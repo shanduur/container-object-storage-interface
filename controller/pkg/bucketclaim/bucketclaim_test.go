@@ -10,9 +10,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	fakekubeclientset "k8s.io/client-go/kubernetes/fake"
 	"k8s.io/client-go/tools/record"
-	"sigs.k8s.io/container-object-storage-interface-api/client/apis/objectstorage/v1alpha1"
-	fakebucketclientset "sigs.k8s.io/container-object-storage-interface-api/client/clientset/versioned/fake"
-	"sigs.k8s.io/container-object-storage-interface-api/controller/pkg/util"
+	"sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha1"
+	fakebucketclientset "sigs.k8s.io/container-object-storage-interface/client/clientset/versioned/fake"
+	"sigs.k8s.io/container-object-storage-interface/controller/pkg/util"
 )
 
 var classGoldParameters = map[string]string{

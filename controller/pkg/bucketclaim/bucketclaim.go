@@ -11,10 +11,10 @@ import (
 	kubeclientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
-	"sigs.k8s.io/container-object-storage-interface-api/client/apis/objectstorage/v1alpha1"
-	bucketclientset "sigs.k8s.io/container-object-storage-interface-api/client/clientset/versioned"
-	objectstoragev1alpha1 "sigs.k8s.io/container-object-storage-interface-api/client/clientset/versioned/typed/objectstorage/v1alpha1"
-	"sigs.k8s.io/container-object-storage-interface-api/controller/pkg/util"
+	"sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha1"
+	bucketclientset "sigs.k8s.io/container-object-storage-interface/client/clientset/versioned"
+	objectstoragev1alpha1 "sigs.k8s.io/container-object-storage-interface/client/clientset/versioned/typed/objectstorage/v1alpha1"
+	"sigs.k8s.io/container-object-storage-interface/controller/pkg/util"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 

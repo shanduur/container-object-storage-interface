@@ -10,8 +10,8 @@ import (
 	"sync"
 	"time"
 
-	v1alpha1 "sigs.k8s.io/container-object-storage-interface-api/client/apis/objectstorage/v1alpha1"
-	bucketclientset "sigs.k8s.io/container-object-storage-interface-api/client/clientset/versioned"
+	v1alpha1 "sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha1"
+	bucketclientset "sigs.k8s.io/container-object-storage-interface/client/clientset/versioned"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

@@ -4,8 +4,8 @@ import (
 	"context"
 
 	// storage
-	"sigs.k8s.io/container-object-storage-interface-api/client/apis/objectstorage/v1alpha1"
-	bucketclientset "sigs.k8s.io/container-object-storage-interface-api/client/clientset/versioned"
+	"sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha1"
+	bucketclientset "sigs.k8s.io/container-object-storage-interface/client/clientset/versioned"
 
 	// k8s client
 	kubeclientset "k8s.io/client-go/kubernetes"

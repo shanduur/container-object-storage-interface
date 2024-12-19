@@ -22,7 +22,7 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"k8s.io/klog/v2"
-	cosi "sigs.k8s.io/container-object-storage-interface-api/proto"
+	cosi "sigs.k8s.io/container-object-storage-interface/proto"
 )
 
 type COSIProvisionerServer struct {

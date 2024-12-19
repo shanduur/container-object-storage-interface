@@ -19,7 +19,7 @@ import (
 	"context"
 
 	"google.golang.org/grpc"
-	cosi "sigs.k8s.io/container-object-storage-interface-api/proto"
+	cosi "sigs.k8s.io/container-object-storage-interface/proto"
 )
 
 var (

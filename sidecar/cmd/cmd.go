@@ -24,11 +24,11 @@ import (
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 	"k8s.io/klog/v2"
-	"sigs.k8s.io/container-object-storage-interface-api/internal/runtime"
-	cosi "sigs.k8s.io/container-object-storage-interface-api/proto"
-	"sigs.k8s.io/container-object-storage-interface-api/sidecar/pkg/bucket"
-	"sigs.k8s.io/container-object-storage-interface-api/sidecar/pkg/bucketaccess"
-	"sigs.k8s.io/container-object-storage-interface-api/sidecar/pkg/provisioner"
+	"sigs.k8s.io/container-object-storage-interface/internal/runtime"
+	cosi "sigs.k8s.io/container-object-storage-interface/proto"
+	"sigs.k8s.io/container-object-storage-interface/sidecar/pkg/bucket"
+	"sigs.k8s.io/container-object-storage-interface/sidecar/pkg/bucketaccess"
+	"sigs.k8s.io/container-object-storage-interface/sidecar/pkg/provisioner"
 )
 
 var (

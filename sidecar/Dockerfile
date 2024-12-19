@@ -36,7 +36,7 @@ LABEL description="COSI sidecar"
 
 LABEL org.opencontainers.image.title="COSI sidecar"
 LABEL org.opencontainers.image.description="Container Object Storage Interface (COSI) sidecar"
-LABEL org.opencontainers.image.source="https://github.com/kubernetes-sigs/container-object-storage-interface-api/sidecar"
+LABEL org.opencontainers.image.source="https://github.com/kubernetes-sigs/container-object-storage-interface/sidecar"
 LABEL org.opencontainers.image.licenses="APACHE-2.0"
 
 WORKDIR /

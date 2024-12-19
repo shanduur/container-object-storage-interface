@@ -25,8 +25,8 @@ import (
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	gentype "k8s.io/client-go/gentype"
-	v1alpha1 "sigs.k8s.io/container-object-storage-interface-api/client/apis/objectstorage/v1alpha1"
-	scheme "sigs.k8s.io/container-object-storage-interface-api/client/clientset/versioned/scheme"
+	v1alpha1 "sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha1"
+	scheme "sigs.k8s.io/container-object-storage-interface/client/clientset/versioned/scheme"
 )
 
 // BucketClassesGetter has a method to return a BucketClassInterface.

@@ -18,7 +18,7 @@ package cosiapi
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sigs.k8s.io/container-object-storage-interface-api/client/apis/objectstorage/v1alpha1"
+	"sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha1"
 )
 
 type SecretS3 struct {

@@ -19,8 +19,8 @@ limitations under the License.
 package objectstorage
 
 import (
-	internalinterfaces "sigs.k8s.io/container-object-storage-interface-api/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "sigs.k8s.io/container-object-storage-interface-api/client/informers/externalversions/objectstorage/v1alpha1"
+	internalinterfaces "sigs.k8s.io/container-object-storage-interface/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "sigs.k8s.io/container-object-storage-interface/client/informers/externalversions/objectstorage/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

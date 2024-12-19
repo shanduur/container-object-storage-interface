@@ -22,8 +22,8 @@ import (
 	"net/http"
 
 	rest "k8s.io/client-go/rest"
-	v1alpha1 "sigs.k8s.io/container-object-storage-interface-api/client/apis/objectstorage/v1alpha1"
-	"sigs.k8s.io/container-object-storage-interface-api/client/clientset/versioned/scheme"
+	v1alpha1 "sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha1"
+	"sigs.k8s.io/container-object-storage-interface/client/clientset/versioned/scheme"
 )
 
 type ObjectstorageV1alpha1Interface interface {

@@ -19,7 +19,7 @@ limitations under the License.
 package v1alpha1
 
 import (
-	internalinterfaces "sigs.k8s.io/container-object-storage-interface-api/client/informers/externalversions/internalinterfaces"
+	internalinterfaces "sigs.k8s.io/container-object-storage-interface/client/informers/externalversions/internalinterfaces"
 )
 
 // Interface provides access to all the informers in this group version.

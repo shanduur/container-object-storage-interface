@@ -26,10 +26,10 @@ import (
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
-	objectstoragev1alpha1 "sigs.k8s.io/container-object-storage-interface-api/client/apis/objectstorage/v1alpha1"
-	versioned "sigs.k8s.io/container-object-storage-interface-api/client/clientset/versioned"
-	internalinterfaces "sigs.k8s.io/container-object-storage-interface-api/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "sigs.k8s.io/container-object-storage-interface-api/client/listers/objectstorage/v1alpha1"
+	objectstoragev1alpha1 "sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha1"
+	versioned "sigs.k8s.io/container-object-storage-interface/client/clientset/versioned"
+	internalinterfaces "sigs.k8s.io/container-object-storage-interface/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "sigs.k8s.io/container-object-storage-interface/client/listers/objectstorage/v1alpha1"
 )
 
 // BucketAccessClassInformer provides access to a shared informer and lister for

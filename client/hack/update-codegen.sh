@@ -33,7 +33,7 @@ kube::codegen::gen_helpers \
 
 kube::codegen::gen_client \
     --output-dir "${CLIENT_ROOT}" \
-    --output-pkg "sigs.k8s.io/container-object-storage-interface-api/client" \
+    --output-pkg "sigs.k8s.io/container-object-storage-interface/client" \
     --boilerplate "${CLIENT_ROOT}/hack/boilerplate.go.txt" \
     --with-watch \
     "${CLIENT_ROOT}/apis"

@@ -3,7 +3,7 @@ package fake
 import (
 	"context"
 	grpc "google.golang.org/grpc"
-	proto "sigs.k8s.io/container-object-storage-interface-api/proto"
+	proto "sigs.k8s.io/container-object-storage-interface/proto"
 )
 
 type FakeIdentityClient struct {

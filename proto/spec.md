@@ -131,7 +131,7 @@ package cosi.v1alpha1;
 
 import "google/protobuf/descriptor.proto";
 
-option go_package = "sigs.k8s.io/container-object-storage-interface-api/proto;cosi";
+option go_package = "sigs.k8s.io/container-object-storage-interface/proto;cosi";
 
 extend google.protobuf.EnumOptions {
     // Indicates that this enum is OPTIONAL and part of an experimental

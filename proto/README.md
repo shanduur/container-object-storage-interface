@@ -22,7 +22,7 @@ The existing primitives in CSI do not apply to objectstorage. Thus the need for 
 All API definitions **_MUST_** satisfy the following requirements:
 
 <!-- - Must be backwards compatible -->
- - Must be in-sync with the API definitions in [sigs.k8s.io/container-object-storage-interface-api](https://github.com/kubernetes-sigs/container-object-storage-interface-api)
+ - Must be in-sync with the API definitions in [sigs.k8s.io/container-object-storage-interface/client](https://github.com/kubernetes-sigs/container-object-storage-interface)
 
 ### Build and Test
 

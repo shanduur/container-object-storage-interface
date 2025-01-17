@@ -23,52 +23,59 @@ help: ## Display this help.
 # If GOARCH is not set in the env, find it
 GOARCH ?= $(shell go env GOARCH)
 
-##
-## ==== ARGS ===== #
+#
+# ==== ARGS =====
+#
 
-## Container build tool compatible with `docker` API
+# Container build tool compatible with `docker` API
 DOCKER ?= docker
 
-## Platform for 'build'
+# Tool compatible with `kubectl` API
+KUBECTL ?= kubectl
+
+# Platform for 'build'
 PLATFORM ?= linux/$(GOARCH)
 
-## Additional args for 'build'
+# Additional args for 'build'
 BUILD_ARGS ?=
 
-## Image tag for controller image build
+# Image tag for controller image build
 CONTROLLER_TAG ?= cosi-controller:latest
 
-## Image tag for sidecar image build
+# Image tag for sidecar image build
 SIDECAR_TAG ?= cosi-provisioner-sidecar:latest
 
-## Location to install dependencies to
-TOOLBIN ?= $(CURDIR)/.cache/tools
-$(TOOLBIN):
-	mkdir -p $(TOOLBIN)
-
 ##@ Development
-
-.PHONY: all .gen
-.gen: generate codegen # can be done in parallel with 'make -j'
-.NOTPARALLEL: all # codegen must be finished before fmt/vet
-all: .gen fmt vet build ## Build all targets, plus their prerequisites (faster with 'make -j')
 
 .PHONY: generate
 generate: controller/Dockerfile sidecar/Dockerfile ## Generate files
 	$(MAKE) -C client crds
 	$(MAKE) -C proto generate
+%/Dockerfile: hack/Dockerfile.in hack/gen-dockerfile.sh
+	hack/gen-dockerfile.sh $* > "$@"
 
 .PHONY: codegen
 codegen: codegen.client codegen.proto ## Generate code
+codegen.%: FORCE
+	$(MAKE) -C $* codegen
 
 .PHONY: fmt
 fmt: fmt.client fmt.controller fmt.sidecar ## Format code
+fmt.%: FORCE
+	cd $* && go fmt ./...
 
 .PHONY: vet
 vet: vet.client vet.controller vet.sidecar ## Vet code
+vet.%: FORCE
+	cd $* && go vet ./...
 
 .PHONY: test
-test: .test.proto test.client test.controller test.sidecar ## Run tests including unit tests
+test: .test.proto test.client test.controller test.sidecar ## Run all unit tests including vet and fmt
+test.%: fmt.% vet.% FORCE
+	cd $* && go test ./...
+.PHONY: .test.proto
+.test.proto: # gRPC proto has a special unit test
+	$(MAKE) -C proto check
 
 .PHONY: test-e2e
 test-e2e: chainsaw # Run e2e tests against the K8s cluster specified in ~/.kube/config. It requires both controller and driver deployed. If you need to create a cluster beforehand, consider using 'cluster' and 'deploy' targets.
@@ -76,14 +83,23 @@ test-e2e: chainsaw # Run e2e tests against the K8s cluster specified in ~/.kube/
 
 .PHONY: lint
 lint: golangci-lint.client golangci-lint.controller golangci-lint.sidecar ## Run all linters (suggest `make -k`)
+golangci-lint.%: golangci-lint
+	cd $* && $(GOLANGCI_LINT) run --config $(CURDIR)/.golangci.yaml --new
 
 .PHONY: lint-fix
 lint-fix: golangci-lint-fix.client golangci-lint-fix.controller golangci-lint-fix.sidecar ## Run all linters and perform fixes where possible (suggest `make -k`)
+golangci-lint-fix.%: golangci-lint
+	cd $* && $(GOLANGCI_LINT) run --config $(CURDIR)/.golangci.yaml --new --fix
 
 ##@ Build
 
+.PHONY: all .gen
+.gen: generate codegen # can be done in parallel with 'make -j'
+.NOTPARALLEL: all # codegen must be finished before fmt/vet
+all: .gen fmt vet build ## Build all container images, plus their prerequisites (faster with 'make -j')
+
 .PHONY: build
-build: build.controller build.sidecar ## Build all container images for development
+build: build.controller build.sidecar ## Build container images without prerequisites
 
 .PHONY: build.controller build.sidecar
 build.controller: controller/Dockerfile ## Build only the controller container image
@@ -92,48 +108,14 @@ build.sidecar: sidecar/Dockerfile ## Build only the sidecar container image
 	$(DOCKER) build --file sidecar/Dockerfile --platform $(PLATFORM) $(BUILD_ARGS) --tag $(SIDECAR_TAG) .
 
 .PHONY: clean
-## Clean build environment
-clean:
+clean: ## Clean build environment
 	$(MAKE) -C proto clean
 
 .PHONY: clobber
-## Clean build environment and cached tools
-clobber:
+clobber: ## Clean build environment and cached tools
 	$(MAKE) -C proto clobber
 	rm -rf $(TOOLBIN)
 	rm -rf $(CURDIR)/.cache
-
-##
-## === INTERMEDIATES === #
-
-%/Dockerfile: hack/Dockerfile.in hack/gen-dockerfile.sh
-	hack/gen-dockerfile.sh $* > "$@"
-
-codegen.%: FORCE
-	$(MAKE) -C $* codegen
-
-fmt.%: FORCE
-	cd $* && go fmt ./...
-
-vet.%: FORCE
-	cd $* && go vet ./...
-
-test.%: fmt.% vet.% FORCE
-	cd $* && go test ./...
-
-# golangci-lint --new flag only complains about new code
-golangci-lint.%: $(GOLANGCI_LINT)
-	cd $* && $(GOLANGCI_LINT) run --config $(CURDIR)/.golangci.yaml --new
-
-golangci-lint-fix.%: $(GOLANGCI_LINT)
-	cd $* && $(GOLANGCI_LINT) run --config $(CURDIR)/.golangci.yaml --new --fix
-
-.PHONY: .test.proto
-.test.proto: # gRPC proto has a special unit test
-	$(MAKE) -C proto check
-
-.PHONY: FORCE # use this to force phony behavior for targets with pattern rules
-FORCE:
 
 ##@ Deployment
 
@@ -146,24 +128,30 @@ cluster-reset: kind ctlptl ## Delete Kind cluster
 	$(CTLPTL) delete -f ctlptl.yaml
 
 .PHONY: deploy
-deploy: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config. The 'generate' and 'codegen' targets should be run manually, and are expected to be run at least once before the 'deploy' target, as those are not cached.
+deploy: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config
 	$(KUSTOMIZE) build . | $(KUBECTL) apply -f -
 
 .PHONY: undeploy
-undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config.
+undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config
 	$(KUSTOMIZE) build . | $(KUBECTL) delete --ignore-not-found=true -f -
 
-##@ Tools
+#
+# ===== Tools =====
+#
 
-## Tool Binaries
+# Location to install dependencies to
+TOOLBIN ?= $(CURDIR)/.cache/tools
+$(TOOLBIN):
+	mkdir -p $(TOOLBIN)
+
+# Tool Binaries
 CHAINSAW ?= $(TOOLBIN)/chainsaw
 CTLPTL ?= $(TOOLBIN)/ctlptl
-GOLANGCI_LINT ?= $(LOCALBIN)/golangci-lint
+GOLANGCI_LINT ?= $(TOOLBIN)/golangci-lint
 KIND ?= $(TOOLBIN)/kind
-KUBECTL ?= kubectl ## Special case, we do not manage it via tools.go
 KUSTOMIZE ?= $(TOOLBIN)/kustomize
 
-## Tool Versions
+# Tool Versions
 CHAINSAW_VERSION ?= $(shell grep 'github.com/kyverno/chainsaw ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 CTLPTL_VERSION ?= $(shell grep 'github.com/tilt-dev/ctlptl ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 GOLANGCI_LINT_VERSION ?= $(shell grep 'github.com/golangci/golangci-lint ' ./hack/tools/go.mod | cut -d ' ' -f 2)
@@ -171,27 +159,27 @@ KIND_VERSION ?= $(shell grep 'sigs.k8s.io/kind ' ./hack/tools/go.mod | cut -d ' 
 KUSTOMIZE_VERSION ?= $(shell grep 'sigs.k8s.io/kustomize/kustomize/v5 ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 
 .PHONY: chainsaw
-chainsaw: $(CHAINSAW)$(CHAINSAW_VERSION) ## Download chainsaw locally if necessary.
+chainsaw: $(CHAINSAW)$(CHAINSAW_VERSION)
 $(CHAINSAW)$(CHAINSAW_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(CHAINSAW),github.com/kyverno/chainsaw,$(CHAINSAW_VERSION))
 
 .PHONY: ctlptl
-ctlptl: $(CTLPTL)$(CTLPTL_VERSION) ## Download ctlptl locally if necessary.
+ctlptl: $(CTLPTL)$(CTLPTL_VERSION)
 $(CTLPTL)$(CTLPTL_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(CTLPTL),github.com/tilt-dev/ctlptl/cmd/ctlptl,$(CTLPTL_VERSION))
 
 .PHONY: golangci-lint
-golangci-lint: $(GOLANGCI_LINT)$(GOLANGCI_LINT_VERSION) ## Download golangci-lint locally if necessary.
-$(GOLANGCI_LINT)$(GOLANGCI_LINT_VERSION): $(LOCALBIN)
+golangci-lint: $(GOLANGCI_LINT)$(GOLANGCI_LINT_VERSION)
+$(GOLANGCI_LINT)$(GOLANGCI_LINT_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
 
 .PHONY: kind
-kind: $(KIND)$(KIND_VERSION) ## Download kind locally if necessary.
+kind: $(KIND)$(KIND_VERSION)
 $(KIND)$(KIND_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(KIND),sigs.k8s.io/kind,$(KIND_VERSION))
 
 .PHONY: kustomize
-kustomize: $(KUSTOMIZE)$(KUSTOMIZE_VERSION) ## Download kustomize locally if necessary.
+kustomize: $(KUSTOMIZE)$(KUSTOMIZE_VERSION)
 $(KUSTOMIZE)$(KUSTOMIZE_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v5,$(KUSTOMIZE_VERSION))
 
@@ -210,3 +198,6 @@ mv $(1) $(1)-$(3) ;\
 } ;\
 ln -sf $(1)-$(3) $(1)
 endef
+
+.PHONY: FORCE # use this to force phony behavior for targets with pattern rules
+FORCE:

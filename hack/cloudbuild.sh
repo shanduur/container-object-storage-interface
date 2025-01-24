@@ -23,7 +23,7 @@ export SIDECAR_TAG="${SIDECAR_IMAGE}:${GIT_TAG}"
 export CONTROLLER_TAG="${CONTROLLER_IMAGE}:${GIT_TAG}"
 
 # build in parallel
-make --jobs --output-sync build
+make build
 
 # add latest tag to just-built images
 gcloud container images add-tag "${CONTROLLER_TAG}" "${CONTROLLER_IMAGE}:latest"

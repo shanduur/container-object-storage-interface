@@ -34,7 +34,7 @@ LABEL description="COSI {{COMPONENT}}"
 
 LABEL org.opencontainers.image.title="COSI {{COMPONENT}}"
 LABEL org.opencontainers.image.description="Container Object Storage Interface (COSI) {{COMPONENT}}"
-LABEL org.opencontainers.image.source="https://github.com/kubernetes-sigs/container-object-storage-interface-api/{{COMPONENT}}"
+LABEL org.opencontainers.image.source="https://github.com/kubernetes-sigs/container-object-storage-interface/{{COMPONENT}}"
 LABEL org.opencontainers.image.licenses="APACHE-2.0"
 
 WORKDIR /

@@ -48,14 +48,20 @@ fi
 if [[ "${PULL_BASE_REF}" == controller/* ]]; then
   echo " ! ! ! this is a tagged controller release ! ! !"
   TAG="${PULL_BASE_REF#controller/*}"
-  ADDITIONAL_CONTROLLER_TAGS+=("${CONTROLLER_IMAGE}:${TAG}")
+  # when tagging a release image, do not apply any other tags other than the release tag
+  # the registry.k8s.io scripting does not handle images with multiple tags
+  ADDITIONAL_CONTROLLER_TAGS=()
+  CONTROLLER_TAG="${CONTROLLER_IMAGE}:${TAG}"
 fi
 
 # PULL_BASE_REF is 'sidecar/TAG' for a tagged sidecar release
 if [[ "${PULL_BASE_REF}" == sidecar/* ]]; then
   echo " ! ! ! this is a tagged sidecar release ! ! !"
   TAG="${PULL_BASE_REF#sidecar/*}"
-  ADDITIONAL_SIDECAR_TAGS+=("${SIDECAR_IMAGE}:${TAG}")
+  # when tagging a release image, do not apply any other tags other than the release tag
+  # the registry.k8s.io scripting does not handle images with multiple tags
+  ADDITIONAL_SIDECAR_TAGS=()
+  SIDECAR_TAG="${SIDECAR_IMAGE}:${TAG}"
 fi
 
 # PULL_BASE_REF is 'v0.y.z*' for tagged alpha releases where controller and sidecar are released simultaneously
@@ -63,17 +69,21 @@ fi
 if [[ "${PULL_BASE_REF}" == 'v0.'* ]]; then
   echo " ! ! ! this is a tagged controller + sidecar release ! ! !"
   TAG="${PULL_BASE_REF}"
-  ADDITIONAL_CONTROLLER_TAGS+=("${CONTROLLER_IMAGE}:${TAG}")
-  ADDITIONAL_SIDECAR_TAGS+=("${SIDECAR_IMAGE}:${TAG}")
+  # when tagging a release image, do not apply any other tags other than the release tag
+  # the registry.k8s.io scripting does not handle images with multiple tags
+  ADDITIONAL_CONTROLLER_TAGS=()
+  ADDITIONAL_SIDECAR_TAGS=()
+  CONTROLLER_TAG="${CONTROLLER_IMAGE}:${TAG}"
+  SIDECAR_TAG="${SIDECAR_IMAGE}:${TAG}"
 fi
 
 # else, PULL_BASE_REF is something that doesn't release image(s) to staging, like:
 #  - a random branch name (e.g., feature-xyz)
 #  - a version tag for a subdir with no image associated (e.g., client/v0.2.0, proto/v0.2.0)
 
-# 'gcloud container images add-tag' within the cloudbuild infrastructure doesn't preserve the date
-# of the underlying image when adding a new tag, resulting in tags dated Dec 31, 1969 (the epoch).
-# To ensure the right date on all built image tags, do the build with '--tag' args for all tags.
+# This script's tagging should be less error-prone if 'docker buildx' has all the tags that an image
+#  will be tagged with during the build process. All tags are applied at once without need to
+# maintain tooling for adding tags to manifests after build.
 
 BUILD_ARGS="${ADDITIONAL_BUILD_ARGS}"
 for tag in "${ADDITIONAL_CONTROLLER_TAGS[@]}"; do

@@ -10,7 +10,6 @@
   - [Developing a COSI Driver](./developing/drivers.md)
   - [Developing client applications](./developing/clients.md)
     - [Go](./developing/clients/go.md)
-    - [Java](./developing/clients/java.md)
-    - [Python](./developing/clients/python.md)
+    <!-- TODO(guides): add new guides -->
 - [Drivers](./drivers.md)
 - [API Reference](./api.md)

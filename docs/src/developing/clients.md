@@ -20,8 +20,7 @@ For more details, refer to the [Kubernetes Versioning and Deprecation Policy](ht
 
 For guidance on developing clients, refer to our language-specific documentation:
 - [Go Client Guide](./clients/go.md)
-- [Java Client Guide](./clients/java.md)
-- [Python Client Guide](./clients/python.md)
+<!-- TODO(guides): add new guides -->
 
 If additional client guides are needed, we welcome contributions from the community.
 

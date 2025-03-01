@@ -154,7 +154,8 @@ const (
 	gracePeriod = 5 * time.Second
 )
 
-func shutdown(ctx context.Context,
+func shutdown(
+	ctx context.Context,
 	wg *sync.WaitGroup,
 	g *grpc.Server,
 ) {

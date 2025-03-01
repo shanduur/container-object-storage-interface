@@ -115,6 +115,10 @@ build.controller: controller/Dockerfile ## Build only the controller container i
 build.sidecar: sidecar/Dockerfile ## Build only the sidecar container image
 	$(DOCKER) build --file sidecar/Dockerfile --platform $(PLATFORM) $(BUILD_ARGS) --tag $(SIDECAR_TAG) .
 
+.PHONY: build-docs
+build-docs: mdbook api-docs
+	cd docs; $(MDBOOK) build
+
 .PHONY: clean
 clean: ## Clean build environment
 	$(MAKE) -C proto clean
@@ -159,6 +163,7 @@ CTLPTL ?= $(TOOLBIN)/ctlptl
 GOLANGCI_LINT ?= $(TOOLBIN)/golangci-lint
 KIND ?= $(TOOLBIN)/kind
 KUSTOMIZE ?= $(TOOLBIN)/kustomize
+MDBOOK ?= $(TOOLBIN)/mdbook
 
 # Tool Versions
 CHAINSAW_VERSION ?= $(shell grep 'github.com/kyverno/chainsaw ' ./hack/tools/go.mod | cut -d ' ' -f 2)
@@ -167,6 +172,7 @@ CTLPTL_VERSION ?= $(shell grep 'github.com/tilt-dev/ctlptl ' ./hack/tools/go.mod
 GOLANGCI_LINT_VERSION ?= $(shell grep 'github.com/golangci/golangci-lint ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 KIND_VERSION ?= $(shell grep 'sigs.k8s.io/kind ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 KUSTOMIZE_VERSION ?= $(shell grep 'sigs.k8s.io/kustomize/kustomize/v5 ' ./hack/tools/go.mod | cut -d ' ' -f 2)
+MDBOOK_VERSION ?= 0.4.45
 
 .PHONY: chainsaw
 chainsaw: $(CHAINSAW)-$(CHAINSAW_VERSION)
@@ -197,6 +203,11 @@ $(KIND)-$(KIND_VERSION): $(TOOLBIN)
 kustomize: $(KUSTOMIZE)-$(KUSTOMIZE_VERSION)
 $(KUSTOMIZE)-$(KUSTOMIZE_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v5,$(KUSTOMIZE_VERSION))
+
+.PHONY: mdbook
+mdbook: $(MDBOOK)-$(MDBOOK_VERSION)
+$(MDBOOK)-$(MDBOOK_VERSION): $(TOOLBIN)
+	./hack/tools/mdbook.sh $(MDBOOK) $(MDBOOK_VERSION)
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary

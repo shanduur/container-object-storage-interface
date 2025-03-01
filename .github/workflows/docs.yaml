@@ -29,28 +29,11 @@ jobs:
   # Build job
   build:
     runs-on: ubuntu-latest
-    env:
-      MDBOOK_VERSION: 0.4.45
     steps:
       - uses: actions/checkout@v4
       - name: Install mdBook
         run: |
-          set -e
-
-          # Download and install
-          URL="https://github.com/rust-lang/mdBook/releases/download/v${MDBOOK_VERSION}/mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-          echo "Downloading: $URL"
-          curl -L "$URL" -o mdbook.tar.gz
-
-          tar -xzf mdbook.tar.gz
-          chmod +x mdbook
-          sudo mv mdbook /usr/local/bin/
-
-          # Clean up
-          rm -f mdbook.tar.gz
-
-          echo "MDBook v$LATEST_VERSION installed successfully!"
-          mdbook --version
+          make mdbook
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
@@ -60,9 +43,7 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Build with mdBook
         run: |
-          make api-docs
-          cd docs
-          mdbook build
+          make api-docs build-docs
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

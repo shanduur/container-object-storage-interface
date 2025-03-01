@@ -83,12 +83,12 @@ import (
 func New(config Config, ssl bool) (Storage, error) {
 	if slices.ContainsFunc(config.Spec.Protocols, func(s string) bool { return strings.EqualFold(s, "s3") }) {
 		if !strings.EqualFold(config.Spec.AuthenticationType, "key") {
-			return nil, fmt.Errorf("%w: invalid authentication type for s3", ErrInvalidConfig)
+			return nil, fmt.Errorf("invalid authentication type for s3")
 		}
 
 		s3secret := config.Spec.SecretS3
 		if s3secret == nil {
-			return nil, fmt.Errorf("%w: s3 secret missing", ErrInvalidConfig)
+			return nil, fmt.Errorf("s3 secret missing")
 		}
 
 		return s3.New(config.Spec.BucketName, *s3secret, ssl)
@@ -96,18 +96,18 @@ func New(config Config, ssl bool) (Storage, error) {
 
 	if slices.ContainsFunc(config.Spec.Protocols, func(s string) bool { return strings.EqualFold(s, "azure") }) {
 		if !strings.EqualFold(config.Spec.AuthenticationType, "key") {
-			return nil, fmt.Errorf("%w: invalid authentication type for azure", ErrInvalidConfig)
+			return nil, fmt.Errorf("invalid authentication type for azure")
 		}
 
 		azureSecret := config.Spec.SecretAzure
 		if azureSecret == nil {
-			return nil, fmt.Errorf("%w: azure secret missing", ErrInvalidConfig)
+			return nil, fmt.Errorf("azure secret missing")
 		}
 
 		return azure.New(config.Spec.BucketName, *azureSecret)
 	}
 
-	return nil, fmt.Errorf("%w: invalid protocol (%v)", ErrInvalidConfig, config.Spec.Protocols)
+	return nil, fmt.Errorf("invalid protocol (%v)", config.Spec.Protocols)
 }
 ```
 

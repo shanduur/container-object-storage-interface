@@ -1,6 +1,9 @@
 # Drivers
 
-| Name                                                                                      | COSI Driver Name                                                                       | Description                                                                                                                | Compatible with COSI Version(s) |
+> - **Platform** will take you to platform documentation;
+> - **COSI Driver Name** will take you to driver repository.
+
+| Platform                                                                                  | COSI Driver Name                                                                       | Description                                                                                                                | Compatible with COSI Version(s) |
 | ----------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
 | [Akamai Cloud Object Storage](https://www.linode.com/products/object-storage/)            | [`objectstorage.cosi.linode.com`](https://github.com/linode/linode-cosi-driver)        | A Kubernetes Container Object Storage Interface (COSI) Driver for Linode                                                   | `v1alpha1`                      |
 | [Azure Blob](https://azure.microsoft.com/en-us/products/storage/blobs)                    | [`blob.cosi.azure.com`](https://github.com/Azure/azure-cosi-driver)                    | This driver allows Kubernetes to use Azure Blob Storage using the Container Storage Object Interface (COSI) infrastructure | `v1alpha1`                      |

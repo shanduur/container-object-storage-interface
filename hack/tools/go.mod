@@ -3,6 +3,7 @@ module tools
 go 1.23.1
 
 require (
+	github.com/elastic/crd-ref-docs v0.1.0
 	github.com/golangci/golangci-lint v1.61.0
 	github.com/kyverno/chainsaw v0.2.11
 	github.com/tilt-dev/ctlptl v0.8.35
@@ -114,7 +115,9 @@ require (
 	github.com/go-toolsmith/typep v1.1.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.1.0 // indirect
 	github.com/go-xmlfmt/xmlfmt v1.1.2 // indirect
+	github.com/gobuffalo/flect v1.0.2 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
+	github.com/goccy/go-yaml v1.11.3 // indirect
 	github.com/gofrs/flock v0.12.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
@@ -320,6 +323,7 @@ require (
 	golang.org/x/text v0.18.0 // indirect
 	golang.org/x/time v0.6.0 // indirect
 	golang.org/x/tools v0.25.0 // indirect
+	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
 	google.golang.org/api v0.196.0 // indirect
 	google.golang.org/genproto v0.0.0-20240903143218-8af14fe29dc1 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240903143218-8af14fe29dc1 // indirect
@@ -347,6 +351,7 @@ require (
 	mvdan.cc/unparam v0.0.0-20240528143540-8a5130ca722f // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.30.3 // indirect
 	sigs.k8s.io/controller-runtime v0.19.0 // indirect
+	sigs.k8s.io/controller-tools v0.16.2 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/kubectl-validate v0.0.5-0.20240827210056-ce13d95db263 // indirect
 	sigs.k8s.io/kustomize/api v0.18.0 // indirect

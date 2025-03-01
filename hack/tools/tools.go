@@ -4,6 +4,7 @@
 package tools
 
 import (
+	_ "github.com/elastic/crd-ref-docs"
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "github.com/kyverno/chainsaw"
 	_ "github.com/tilt-dev/ctlptl/cmd/ctlptl"

@@ -12,4 +12,4 @@
     - [Go](./developing/clients/go.md)
     <!-- TODO(guides): add new guides -->
 - [Drivers](./drivers.md)
-- [API Reference](./api.md)
+- [API Reference](./api/out.md)

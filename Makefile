@@ -51,8 +51,16 @@ SIDECAR_TAG ?= cosi-provisioner-sidecar:latest
 generate: controller/Dockerfile sidecar/Dockerfile ## Generate files
 	$(MAKE) -C client crds
 	$(MAKE) -C proto generate
+	$(MAKE) api-docs
 %/Dockerfile: hack/Dockerfile.in hack/gen-dockerfile.sh
 	hack/gen-dockerfile.sh $* > "$@"
+.PHONY: api-docs
+api-docs: crd-ref-docs
+	$(CRD_REF_DOCS) \
+		--config=./docs/.crd-ref-docs.yaml \
+		--source-path=./client/apis \
+		--renderer=markdown \
+		--output-path=./docs/src/api/
 
 .PHONY: codegen
 codegen: codegen.client codegen.proto ## Generate code
@@ -146,6 +154,7 @@ $(TOOLBIN):
 
 # Tool Binaries
 CHAINSAW ?= $(TOOLBIN)/chainsaw
+CRD_REF_DOCS ?= $(TOOLBIN)/crd-ref-docs
 CTLPTL ?= $(TOOLBIN)/ctlptl
 GOLANGCI_LINT ?= $(TOOLBIN)/golangci-lint
 KIND ?= $(TOOLBIN)/kind
@@ -153,34 +162,40 @@ KUSTOMIZE ?= $(TOOLBIN)/kustomize
 
 # Tool Versions
 CHAINSAW_VERSION ?= $(shell grep 'github.com/kyverno/chainsaw ' ./hack/tools/go.mod | cut -d ' ' -f 2)
+CRD_REF_DOCS_VERSION ?= $(shell grep 'github.com/elastic/crd-ref-docs ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 CTLPTL_VERSION ?= $(shell grep 'github.com/tilt-dev/ctlptl ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 GOLANGCI_LINT_VERSION ?= $(shell grep 'github.com/golangci/golangci-lint ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 KIND_VERSION ?= $(shell grep 'sigs.k8s.io/kind ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 KUSTOMIZE_VERSION ?= $(shell grep 'sigs.k8s.io/kustomize/kustomize/v5 ' ./hack/tools/go.mod | cut -d ' ' -f 2)
 
 .PHONY: chainsaw
-chainsaw: $(CHAINSAW)$(CHAINSAW_VERSION)
-$(CHAINSAW)$(CHAINSAW_VERSION): $(TOOLBIN)
+chainsaw: $(CHAINSAW)-$(CHAINSAW_VERSION)
+$(CHAINSAW)-$(CHAINSAW_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(CHAINSAW),github.com/kyverno/chainsaw,$(CHAINSAW_VERSION))
 
+.PHONY: crd-ref-docs
+crd-ref-docs: $(CRD_REF_DOCS)-$(CRD_REF_DOCS_VERSION)
+$(CRD_REF_DOCS)-$(CRD_REF_DOCS_VERSION): $(TOOLBIN)
+	$(call go-install-tool,$(CRD_REF_DOCS),github.com/elastic/crd-ref-docs,$(CRD_REF_DOCS_VERSION))
+
 .PHONY: ctlptl
-ctlptl: $(CTLPTL)$(CTLPTL_VERSION)
-$(CTLPTL)$(CTLPTL_VERSION): $(TOOLBIN)
+ctlptl: $(CTLPTL)-$(CTLPTL_VERSION)
+$(CTLPTL)-$(CTLPTL_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(CTLPTL),github.com/tilt-dev/ctlptl/cmd/ctlptl,$(CTLPTL_VERSION))
 
 .PHONY: golangci-lint
-golangci-lint: $(GOLANGCI_LINT)$(GOLANGCI_LINT_VERSION)
-$(GOLANGCI_LINT)$(GOLANGCI_LINT_VERSION): $(TOOLBIN)
+golangci-lint: $(GOLANGCI_LINT)-$(GOLANGCI_LINT_VERSION)
+$(GOLANGCI_LINT)-$(GOLANGCI_LINT_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
 
 .PHONY: kind
-kind: $(KIND)$(KIND_VERSION)
-$(KIND)$(KIND_VERSION): $(TOOLBIN)
+kind: $(KIND)-$(KIND_VERSION)
+$(KIND)-$(KIND_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(KIND),sigs.k8s.io/kind,$(KIND_VERSION))
 
 .PHONY: kustomize
-kustomize: $(KUSTOMIZE)$(KUSTOMIZE_VERSION)
-$(KUSTOMIZE)$(KUSTOMIZE_VERSION): $(TOOLBIN)
+kustomize: $(KUSTOMIZE)-$(KUSTOMIZE_VERSION)
+$(KUSTOMIZE)-$(KUSTOMIZE_VERSION): $(TOOLBIN)
 	$(call go-install-tool,$(KUSTOMIZE),sigs.k8s.io/kustomize/kustomize/v5,$(KUSTOMIZE_VERSION))
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist

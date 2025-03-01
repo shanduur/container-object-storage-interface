@@ -51,11 +51,16 @@ jobs:
 
           echo "MDBook v$LATEST_VERSION installed successfully!"
           mdbook --version
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ./hack/tools/go.mod
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5
       - name: Build with mdBook
         run: |
+          make api-docs
           cd docs
           mdbook build
       - name: Upload artifact

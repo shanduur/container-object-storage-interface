@@ -32,7 +32,7 @@ else
 fi
 
 # Construct download URL
-URL="https://github.com/rust-lang/mdBook/releases/download/v${MDBOOK_VERSION}/mdbook-v${MDBOOK_VERSION}-${ARCH}-${OS_TYPE}.tar.gz"
+URL="https://github.com/rust-lang/mdBook/releases/download/${MDBOOK_VERSION}/mdbook-${MDBOOK_VERSION}-${ARCH}-${OS_TYPE}.tar.gz"
 echo "Downloading: $URL"
 curl -L "$URL" -o mdbook.tar.gz
 

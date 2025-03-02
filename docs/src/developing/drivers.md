@@ -57,7 +57,7 @@ func run(ctx context.Context) error {
 
 	cfg := config.Load() // placeholder
 
-	identityServer := &driver.IdentityServer{Name: opts.driverName}
+	identityServer := &driver.IdentityServer{Name: "cosi.example.com"}
 	provisionerServer := &driver.ProvisionerServer{
 		Config: cfg,
 	}
@@ -67,9 +67,14 @@ func run(ctx context.Context) error {
 		return fmt.Errorf("gRPC server creation failed: %w", err)
 	}
 
-	lis, cleanup, err := listener(ctx, opts.cosiEndpoint)
+	cosiEndpoint, ok := os.LookupEnv("COSI_ENDPOINT")
+	if !ok {
+		cosiEndpoint = "unix:///var/lib/cosi/cosi.sock"
+	}
+
+	lis, cleanup, err := listener(ctx, cosiEndpoint)
 	if err != nil {
-		return fmt.Errorf("failed to create listener for %s: %w", opts.cosiEndpoint, err)
+		return fmt.Errorf("failed to create listener for %s: %w", cosiEndpoint, err)
 	}
 	defer cleanup()
 

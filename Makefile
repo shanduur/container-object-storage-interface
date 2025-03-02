@@ -157,22 +157,22 @@ $(TOOLBIN):
 	mkdir -p $(TOOLBIN)
 
 # Tool Binaries
-CHAINSAW ?= $(TOOLBIN)/chainsaw
-CRD_REF_DOCS ?= $(TOOLBIN)/crd-ref-docs
-CTLPTL ?= $(TOOLBIN)/ctlptl
+CHAINSAW      ?= $(TOOLBIN)/chainsaw
+CRD_REF_DOCS  ?= $(TOOLBIN)/crd-ref-docs
+CTLPTL        ?= $(TOOLBIN)/ctlptl
 GOLANGCI_LINT ?= $(TOOLBIN)/golangci-lint
-KIND ?= $(TOOLBIN)/kind
-KUSTOMIZE ?= $(TOOLBIN)/kustomize
-MDBOOK ?= $(TOOLBIN)/mdbook
+KIND          ?= $(TOOLBIN)/kind
+KUSTOMIZE     ?= $(TOOLBIN)/kustomize
+MDBOOK        ?= $(TOOLBIN)/mdbook
 
 # Tool Versions
-CHAINSAW_VERSION ?= $(shell grep 'github.com/kyverno/chainsaw ' ./hack/tools/go.mod | cut -d ' ' -f 2)
-CRD_REF_DOCS_VERSION ?= $(shell grep 'github.com/elastic/crd-ref-docs ' ./hack/tools/go.mod | cut -d ' ' -f 2)
-CTLPTL_VERSION ?= $(shell grep 'github.com/tilt-dev/ctlptl ' ./hack/tools/go.mod | cut -d ' ' -f 2)
-GOLANGCI_LINT_VERSION ?= $(shell grep 'github.com/golangci/golangci-lint ' ./hack/tools/go.mod | cut -d ' ' -f 2)
-KIND_VERSION ?= $(shell grep 'sigs.k8s.io/kind ' ./hack/tools/go.mod | cut -d ' ' -f 2)
-KUSTOMIZE_VERSION ?= $(shell grep 'sigs.k8s.io/kustomize/kustomize/v5 ' ./hack/tools/go.mod | cut -d ' ' -f 2)
-MDBOOK_VERSION ?= 0.4.45
+CHAINSAW_VERSION      ?= v0.2.11
+CRD_REF_DOCS_VERSION  ?= v0.1.0
+CTLPTL_VERSION        ?= v0.8.35
+GOLANGCI_LINT_VERSION ?= v1.61.0
+KIND_VERSION          ?= v0.24.0
+KUSTOMIZE_VERSION     ?= v5.5.0
+MDBOOK_VERSION        ?= v0.4.45
 
 .PHONY: chainsaw
 chainsaw: $(CHAINSAW)-$(CHAINSAW_VERSION)
@@ -207,7 +207,7 @@ $(KUSTOMIZE)-$(KUSTOMIZE_VERSION): $(TOOLBIN)
 .PHONY: mdbook
 mdbook: $(MDBOOK)-$(MDBOOK_VERSION)
 $(MDBOOK)-$(MDBOOK_VERSION): $(TOOLBIN)
-	./hack/tools/mdbook.sh $(MDBOOK) $(MDBOOK_VERSION)
+	./hack/mdbook.sh $(MDBOOK) $(MDBOOK_VERSION)
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary

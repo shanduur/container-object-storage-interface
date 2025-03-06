@@ -40,10 +40,10 @@ PLATFORM ?= linux/$(GOARCH)
 BUILD_ARGS ?=
 
 # Image tag for controller image build
-CONTROLLER_TAG ?= cosi-controller:latest
+CONTROLLER_TAG ?= localhost:5005/cosi-controller:dev-$(shell git describe --match='' --always --abbrev=6 --dirty)
 
 # Image tag for sidecar image build
-SIDECAR_TAG ?= cosi-provisioner-sidecar:latest
+SIDECAR_TAG ?= localhost:5005/cosi-provisioner-sidecar:dev-$(shell git describe --match='' --always --abbrev=6 --dirty)
 
 ##@ Development
 
@@ -119,6 +119,12 @@ build.sidecar: sidecar/Dockerfile ## Build only the sidecar container image
 build-docs: mdbook api-docs
 	cd docs; $(MDBOOK) build
 
+MDBOOK_PORT ?= 3000
+
+.PHONY: serve-docs
+serve-docs: mdbook api-docs
+	cd docs; $(MDBOOK) serve --port $(MDBOOK_PORT)
+
 .PHONY: clean
 clean: ## Clean build environment
 	$(MAKE) -C proto clean
@@ -133,11 +139,11 @@ clobber: ## Clean build environment and cached tools
 
 .PHONY: cluster
 cluster: kind ctlptl ## Create Kind cluster and local registry
-	$(CTLPTL) apply -f ctlptl.yaml
+	@PATH=$(TOOLBIN):$(PATH) $(CTLPTL) apply -f ctlptl.yaml
 
 .PHONY: cluster-reset
 cluster-reset: kind ctlptl ## Delete Kind cluster
-	$(CTLPTL) delete -f ctlptl.yaml
+	@PATH=$(TOOLBIN):$(PATH) $(CTLPTL) delete -f ctlptl.yaml
 
 .PHONY: deploy
 deploy: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config

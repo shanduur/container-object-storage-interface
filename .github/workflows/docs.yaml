@@ -37,7 +37,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ./hack/tools/go.mod
+          go-version-file: ./client/go.mod
       - name: Setup Pages
         id: pages
         uses: actions/configure-pages@v5

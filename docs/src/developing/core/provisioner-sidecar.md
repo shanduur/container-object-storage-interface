@@ -1,3 +1,0 @@
-# Provisioner sidecar
-
-// TODO

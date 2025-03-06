@@ -5,6 +5,11 @@ set -eu
 MDBOOK="${1}"
 MDBOOK_VERSION="${2}"
 
+# If it exists, do not redownload
+if [ -f "${MDBOOK}-${MDBOOK_VERSION}" ]; then
+  exit 0
+fi
+
 # Detect OS
 OS="$(uname -s)"
 ARCH="$(uname -m)"

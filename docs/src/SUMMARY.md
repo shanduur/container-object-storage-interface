@@ -8,8 +8,6 @@
   - [Monitoring](./operations/monitoring.md)
 - [Developer guide](./developing/guide.md)
   - [Developing "core" COSI](./developing/core.md)
-    - [Controller](./developing/core/controller.md)
-    - [Provisioner sidecar](./developing/core/provisioner-sidecar.md)
   - [Developing a COSI Driver](./developing/drivers.md)
   - [Developing client applications](./developing/clients.md)
     - [Go](./developing/clients/go.md)

@@ -2,7 +2,14 @@
 
 ## Configuration Structure
 
-The `Config` struct is the primary configuration object for the storage package. It encapsulates all necessary settings for interacting with different storage providers.
+The Config struct is the primary configuration object for the storage package. It encapsulates all necessary settings for interacting with different storage providers. This design ensures that all configuration details are centralized and easily maintainable, allowing your application to switch storage backends with minimal code changes.
+
+The nested `Spec` struct defines both generic and provider-specific parameters:
+
+* `BucketName`: Specifies the target storage container or bucket. This value directs where the data will be stored or retrieved.
+* `AuthenticationType`: Indicates the method of authentication (for example, "key"). This ensures that the correct credentials are used when accessing a storage provider.
+* `Protocols`: An array of strings that informs the system which storage protocols (e.g., "s3" or "azure") are supported. The factory uses this to determine the appropriate client to initialize.
+* `SecretS3` / `SecretAzure`: These fields hold pointers to the respective secret structures needed for authenticating with S3 or Azure services. Their presence is conditional on the protocols configured.
 
 ```go
 // import "example.com/pkg/storage"
@@ -21,9 +28,11 @@ type Spec struct {
 }
 ```
 
-## Azure Secret Structure
+### Azure Secret Structure
 
-The `SecretAzure` struct holds authentication credentials for accessing Azure-based storage services.
+The `SecretAzure` struct holds authentication credentials for accessing Azure-based storage services. It is essential when interacting with Azure Blob storage, as it contains a shared access token along with an expiration timestamp. The inclusion of the `ExpiryTimestamp` allows your application to check token validity. 
+
+> While current COSI implementation doesn't auto-renew tokens, the `ExpiryTimestamp` provides hooks for future refresh logic.
 
 ```go
 // import "example.com/pkg/storage/azure"
@@ -35,9 +44,9 @@ type SecretAzure struct {
 }
 ```
 
-## S3 Secret Structure
+### S3 Secret Structure
 
-The `SecretS3` struct holds authentication credentials for accessing S3-compatible storage services.
+The `SecretS3` struct holds authentication credentials for accessing S3-compatible storage services. This struct includes the endpoint, region, and access credentials required to securely interact with the S3 service. By isolating these values into a dedicated structure, the design helps maintain clear separation between configuration types, thus enhancing code clarity.
 
 ```go
 // import "example.com/pkg/storage/s3"
@@ -53,7 +62,9 @@ type SecretS3 struct {
 
 ## Factory
 
-The [factory pattern](https://en.wikipedia.org/wiki/Factory_method_pattern) is used to instantiate the appropriate storage backend based on the provided configuration. We will hide the implementation behind the interface.
+The factory pattern[^1] is used to instantiate the appropriate storage backend based on the provided configuration. We will hide the implementation behind the interface.
+
+The factory function examines the configuration’s `Protocols` array and validates the `AuthenticationType` along with the corresponding secret. It then returns a concrete implementation of the Storage interface. This method of instantiation promotes extensibility, making it easier to support additional storage protocols in the future, as the COSI specification evolves.
 
 Here is a minimal interface that supports only basic `Delete`/`Get`/`Put` operations:
 
@@ -117,7 +128,7 @@ As we alredy defined the factory and uppermost configuration, let's get into the
 
 ### S3
 
-In the implementation of S3 client, we will use [MinIO](https://github.com/minio/minio-go) client library, as it's more lightweight than AWS SDK.
+In the implementation of S3 client, we will use [MinIO](https://github.com/minio/minio-go) client library, as it's more lightweight than [AWS SDK](https://github.com/aws/aws-sdk-go-v2).
 
 ```go
 // import "example.com/pkg/storage/s3"
@@ -176,7 +187,7 @@ func (c *Client) Put(ctx context.Context, key string, data io.Reader, size int64
 
 ### Azure Blob
 
-In the implementation of Azure client, we will use [Azure SDK](https://github.com/Azure/azure-sdk-for-go) client library. Note, that the configuration is done with `NoCredentials` client, as the Azure secret contains shared access signatures (SAS).
+In the implementation of Azure client, we will use [Azure SDK](https://github.com/Azure/azure-sdk-for-go) client library. Note, that the configuration is done with `NoCredentials` client, as the Azure secret contains shared access signatures (SAS)[^2].
 
 ```go
 // import "example.com/pkg/storage/azure"
@@ -231,7 +242,7 @@ func (c *Client) Put(ctx context.Context, blobName string, data io.Reader, size 
 
 ## Summing up
 
-Once all our code is in place, we can start using it in our app. Reading configuration is as simple as opening file and decoding it using standard `encoding/json` package.
+Once all components are in place, using the storage package in your application becomes straightforward. The process starts with reading a JSON configuration file, which is then decoded into the `Config` struct. The factory method selects and initializes the appropriate storage client based on the configuration, enabling seamless integration with either S3 or Azure storage.
 
 ```go
 import (
@@ -262,3 +273,6 @@ func example() {
 	// ...
 }
 ```
+
+[^1]: [https://en.wikipedia.org/wiki/Factory_method_pattern](https://en.wikipedia.org/wiki/Factory_method_pattern)
+[^2]: [https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview](https://en.wikipedia.org/wiki/Factory_method_pattern)

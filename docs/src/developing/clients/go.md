@@ -253,7 +253,7 @@ import (
 )
 
 func example() {
-	f, err := os.Open("/opt/cosi/BucketInfo.json")
+	f, err := os.Open("/opt/cosi/BucketInfo")
 	if err != nil {
 		panic(err)
 	}

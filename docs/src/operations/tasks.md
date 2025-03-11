@@ -87,5 +87,5 @@ spec:
             secretName: example-secret
             items:
               - key: BucketInfo
-                path: BucketInfo.json
+                path: BucketInfo
 ```

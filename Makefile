@@ -136,11 +136,11 @@ clobber: ## Clean build environment and cached tools
 
 .PHONY: cluster
 cluster: kind ctlptl ## Create Kind cluster and local registry
-	@PATH=$(TOOLBIN):$(PATH) $(CTLPTL) apply -f ctlptl.yaml
+	PATH=$(TOOLBIN):$(PATH) $(CTLPTL) apply -f ctlptl.yaml
 
 .PHONY: cluster-reset
 cluster-reset: kind ctlptl ## Delete Kind cluster
-	@PATH=$(TOOLBIN):$(PATH) $(CTLPTL) delete -f ctlptl.yaml
+	PATH=$(TOOLBIN):$(PATH) $(CTLPTL) delete -f ctlptl.yaml
 
 .PHONY: deploy
 deploy: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config

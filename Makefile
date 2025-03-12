@@ -169,13 +169,13 @@ KUSTOMIZE     ?= $(TOOLBIN)/kustomize
 MDBOOK        ?= $(TOOLBIN)/mdbook
 
 # Tool Versions
-CHAINSAW_VERSION      ?= v0.2.11
+CHAINSAW_VERSION      ?= v0.2.12
 CRD_REF_DOCS_VERSION  ?= v0.1.0
-CTLPTL_VERSION        ?= v0.8.35
-GOLANGCI_LINT_VERSION ?= v1.61.0
-KIND_VERSION          ?= v0.24.0
-KUSTOMIZE_VERSION     ?= v5.5.0
-MDBOOK_VERSION        ?= v0.4.45
+CTLPTL_VERSION        ?= v0.8.39
+GOLANGCI_LINT_VERSION ?= v1.64.7
+KIND_VERSION          ?= v0.27.0
+KUSTOMIZE_VERSION     ?= v5.6.0
+MDBOOK_VERSION        ?= v0.4.47
 
 .PHONY: chainsaw
 chainsaw: $(CHAINSAW)-$(CHAINSAW_VERSION)
@@ -195,7 +195,7 @@ $(CTLPTL)-$(CTLPTL_VERSION): $(TOOLBIN)
 .PHONY: golangci-lint
 golangci-lint: $(GOLANGCI_LINT)-$(GOLANGCI_LINT_VERSION)
 $(GOLANGCI_LINT)-$(GOLANGCI_LINT_VERSION): $(TOOLBIN)
-	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
+	./hack/tools/install-golangci-lint.sh $(TOOLBIN) $(GOLANGCI_LINT) $(GOLANGCI_LINT_VERSION)
 
 .PHONY: kind
 kind: $(KIND)-$(KIND_VERSION)
@@ -210,7 +210,7 @@ $(KUSTOMIZE)-$(KUSTOMIZE_VERSION): $(TOOLBIN)
 .PHONY: mdbook
 mdbook: $(MDBOOK)-$(MDBOOK_VERSION)
 $(MDBOOK)-$(MDBOOK_VERSION): $(TOOLBIN)
-	./hack/install-mdbook.sh $(MDBOOK) $(MDBOOK_VERSION)
+	./hack/tools/install-mdbook.sh $(MDBOOK) $(MDBOOK_VERSION)
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary

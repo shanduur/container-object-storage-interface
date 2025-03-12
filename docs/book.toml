@@ -6,7 +6,8 @@ authors = ["The Kubernetes Authors"]
 [output.html]
 git-repository-url = "https://github.com/kubernetes-sigs/container-object-storage-interface/tree/main/docs"
 edit-url-template = "https://github.com/kubernetes-sigs/container-object-storage-interface/tree/main/docs/{path}"
-additional-css = ["custom.css"]
+additional-css = ["theme/custom.css"]
+theme = "theme"
 
 [preprocessor.generate-version]
 renderers = ["html"]

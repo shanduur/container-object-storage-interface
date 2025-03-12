@@ -4,6 +4,7 @@ set -eu
 
 MDBOOK="${1}"
 MDBOOK_VERSION="${2}"
+CURDIR="${PWD}"
 
 # If it exists, do not redownload
 if [ -f "${MDBOOK}-${MDBOOK_VERSION}" ]; then
@@ -49,5 +50,18 @@ ln -sf "${MDBOOK}-${MDBOOK_VERSION}" "${MDBOOK}"
 
 # Clean up
 rm -f mdbook.tar.gz
+
+TEMP=$(mktemp -d)
+trap 'rm -rf "$TEMP"' EXIT
+
+cd "${TEMP}"
+
+TEMPLATE='<div id="version" class="version">\n  VERSION-PLACEHOLDER\n</div>'
+
+"${MDBOOK}" init --theme --title "template" --ignore "none"
+
+cp theme/index.hbs "${CURDIR}/docs/theme/index-template.hbs"
+sed -i "/<div id=\"content\" class=\"content\">/i ${TEMPLATE}" "${CURDIR}/docs/theme/index-template.hbs"
+
 
 echo "$("${MDBOOK}" --version) installed successfully!"

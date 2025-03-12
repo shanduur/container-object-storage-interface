@@ -119,7 +119,7 @@ build-docs: generate mdbook
 MDBOOK_PORT ?= 3000
 
 .PHONY: serve-docs
-serve-docs: generate mdbook
+serve-docs: generate mdbook build-docs
 	cd docs; $(MDBOOK) serve --port $(MDBOOK_PORT)
 
 .PHONY: clean

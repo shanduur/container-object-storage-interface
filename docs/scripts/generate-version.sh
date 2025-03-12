@@ -1,8 +1,15 @@
-jq ".[1]";
+#!/usr/bin/env bash
+
+set -eu
+
+jq ".[1]"
+
 SHA=$(git rev-parse HEAD)
-VERSION="Built from: <a target="_blank" href=\"https:\/\/github.com\/kubernetes-sigs\/container-object-storage-interface\/tree\/${SHA}\"><code>${SHA}<\/code><\/a>"
-TAG=$(git tag --contains "$SHA" | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$')
-if [ -n "$TAG" ]; then
-  VERSION="Version: <a target="_blank" href=\"https:\/\/github.com\/kubernetes-sigs\/container-object-storage-interface\/tree\/${TAG}\"><code>${TAG}<\/code><\/a> ${VERSION}"
+VERSION="Commit: <a target="_blank" href=\"https:\/\/github.com\/kubernetes-sigs\/container-object-storage-interface\/tree\/${SHA}\"><code>${SHA}<\/code><\/a>"
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+if [ -n "$BRANCH" ]; then
+  VERSION="Branch: <a target="_blank" href=\"https:\/\/github.com\/kubernetes-sigs\/container-object-storage-interface\/tree\/${BRANCH}\"><code>${BRANCH}<\/code><\/a> ${VERSION}"
 fi
+
 sed "s/VERSION-PLACEHOLDER/${VERSION}/" theme/index-template.hbs > theme/index.hbs

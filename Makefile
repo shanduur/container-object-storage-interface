@@ -48,19 +48,16 @@ SIDECAR_TAG ?= localhost:5005/cosi-provisioner-sidecar:dev-$(shell git describe 
 ##@ Development
 
 .PHONY: generate
-generate: controller/Dockerfile sidecar/Dockerfile ## Generate files
+generate: crd-ref-docs controller/Dockerfile sidecar/Dockerfile ## Generate files
 	$(MAKE) -C client crds
 	$(MAKE) -C proto generate
-	$(MAKE) api-docs
-%/Dockerfile: hack/Dockerfile.in hack/gen-dockerfile.sh
-	hack/gen-dockerfile.sh $* > "$@"
-.PHONY: api-docs
-api-docs: crd-ref-docs
 	$(CRD_REF_DOCS) \
 		--config=./docs/.crd-ref-docs.yaml \
 		--source-path=./client/apis \
 		--renderer=markdown \
 		--output-path=./docs/src/api/
+%/Dockerfile: hack/Dockerfile.in hack/gen-dockerfile.sh
+	hack/gen-dockerfile.sh $* > "$@"
 
 .PHONY: codegen
 codegen: codegen.client codegen.proto ## Generate code
@@ -116,13 +113,13 @@ build.sidecar: sidecar/Dockerfile ## Build only the sidecar container image
 	$(DOCKER) build --file sidecar/Dockerfile --platform $(PLATFORM) $(BUILD_ARGS) --tag $(SIDECAR_TAG) .
 
 .PHONY: build-docs
-build-docs: mdbook api-docs
+build-docs: generate mdbook
 	cd docs; $(MDBOOK) build
 
 MDBOOK_PORT ?= 3000
 
 .PHONY: serve-docs
-serve-docs: mdbook api-docs
+serve-docs: generate mdbook
 	cd docs; $(MDBOOK) serve --port $(MDBOOK_PORT)
 
 .PHONY: clean
@@ -213,7 +210,7 @@ $(KUSTOMIZE)-$(KUSTOMIZE_VERSION): $(TOOLBIN)
 .PHONY: mdbook
 mdbook: $(MDBOOK)-$(MDBOOK_VERSION)
 $(MDBOOK)-$(MDBOOK_VERSION): $(TOOLBIN)
-	./hack/mdbook.sh $(MDBOOK) $(MDBOOK_VERSION)
+	./hack/install-mdbook.sh $(MDBOOK) $(MDBOOK_VERSION)
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary

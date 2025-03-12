@@ -40,10 +40,10 @@ PLATFORM ?= linux/$(GOARCH)
 BUILD_ARGS ?=
 
 # Image tag for controller image build
-CONTROLLER_TAG ?= localhost:5005/cosi-controller:dev-$(shell git describe --match='' --always --abbrev=6 --dirty)
+CONTROLLER_TAG ?= cosi-controller:latest
 
 # Image tag for sidecar image build
-SIDECAR_TAG ?= localhost:5005/cosi-provisioner-sidecar:dev-$(shell git describe --match='' --always --abbrev=6 --dirty)
+SIDECAR_TAG ?= cosi-provisioner-sidecar:latest
 
 ##@ Development
 

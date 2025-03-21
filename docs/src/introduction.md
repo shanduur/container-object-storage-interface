@@ -2,7 +2,7 @@
 
 ## Container Object Storage Interface (COSI)
 
-Container Object Storage Interface (COSI) is a set of abstractions for provisioning and management of object storage. It aims to be a common layer of abstraction across multiple object storage vendors, such that workloads can request and automatically be provisioned object storage buckets.
+Container Object Storage Interface (COSI) is a set of abstractions for provisioning and management of object storage. It aims to be a common layer of abstraction across multiple object storage vendors, such that workloads can request and automatically be provisioned with object storage buckets.
 
 The goals of this project are:
 
@@ -23,7 +23,7 @@ The existing primitives in CSI do not apply to objectstorage. Thus the need for 
 
 ## Community, discussion, contribution, and support
 
-You can reach the maintainers and interact with community throught the following channels:
+You can reach the maintainers and interact with community through the following channels:
 
 - [#sig-storage-cosi](https://kubernetes.slack.com/messages/sig-storage-cosi) slack channel
 - [container-object-storage-interface](https://groups.google.com/g/container-object-storage-interface-wg?pli=1) mailing list

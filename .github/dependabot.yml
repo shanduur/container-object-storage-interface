@@ -3,10 +3,11 @@ enable-beta-ecosystems: true
 updates:
 
   - package-ecosystem: "gomod"
-    directory: "/"
+    directories:
+      - "**/*"
     schedule:
       interval: "weekly"
-    groups: # batch updates together for fewer dependabot PRs
+    groups:
       golang-dependencies:
         patterns:
           - "github.com/golang*"
@@ -18,11 +19,15 @@ updates:
         exclude-patterns:
           # controller-runtime has history of breaking API changes more often than other k8s projects
           - "sigs.k8s.io/controller-runtime"
-      github-dependencies:
-        patterns:
-          - "github.com*"
 
   - package-ecosystem: "docker"
-    directory: "/"
+    directories:
+      - "**/*"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions"
+    directories:
+      - "**/*"
     schedule:
       interval: "weekly"

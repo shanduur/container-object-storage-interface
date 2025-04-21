@@ -19,15 +19,21 @@ updates:
         exclude-patterns:
           # controller-runtime has history of breaking API changes more often than other k8s projects
           - "sigs.k8s.io/controller-runtime"
+    labels:
+      - ok-to-test
 
   - package-ecosystem: "docker"
     directories:
       - "**/*"
     schedule:
       interval: "weekly"
+    labels:
+      - ok-to-test
 
   - package-ecosystem: "github-actions"
     directories:
       - "**/*"
     schedule:
       interval: "weekly"
+    labels:
+      - ok-to-test

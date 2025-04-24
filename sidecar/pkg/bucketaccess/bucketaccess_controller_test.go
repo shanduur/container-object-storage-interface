@@ -253,7 +253,7 @@ func TestAddBucketAccess(t *testing.T) {
 			kubeClient:        kubeClient,
 		}
 
-		t.Logf(tc.name)
+		t.Log(tc.name)
 		err := bal.Add(ctx, &ba)
 		if err != nil {
 			t.Errorf("Add returned: %+v", err)

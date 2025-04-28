@@ -89,12 +89,12 @@ test-e2e: chainsaw # Run e2e tests against the K8s cluster specified in ~/.kube/
 .PHONY: lint
 lint: golangci-lint.client golangci-lint.controller golangci-lint.sidecar ## Run all linters (suggest `make -k`)
 golangci-lint.%: golangci-lint
-	cd $* && $(GOLANGCI_LINT) run --config $(CURDIR)/.golangci.yaml --new
+	cd $* && $(GOLANGCI_LINT) run $(GOLANGCI_LINT_RUN_OPTS) --config $(CURDIR)/.golangci.yaml --new
 
 .PHONY: lint-fix
 lint-fix: golangci-lint-fix.client golangci-lint-fix.controller golangci-lint-fix.sidecar ## Run all linters and perform fixes where possible (suggest `make -k`)
 golangci-lint-fix.%: golangci-lint
-	cd $* && $(GOLANGCI_LINT) run --config $(CURDIR)/.golangci.yaml --new --fix
+	cd $* && $(GOLANGCI_LINT) run $(GOLANGCI_LINT_RUN_OPTS) --config $(CURDIR)/.golangci.yaml --new --fix
 
 ##@ Build
 

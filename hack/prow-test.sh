@@ -3,6 +3,6 @@ set -o errexit
 set -o nounset
 set -o xtrace
 
-export GOMAXPROCS=2 # prow job lags if too many threads
+echo "GOMAXPROCS: $GOMAXPROCS" # debug prow CPU limit to ensure job not being throttled
 
 make test

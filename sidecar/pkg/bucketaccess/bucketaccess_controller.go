@@ -321,7 +321,7 @@ func (bal *BucketAccessListener) Update(ctx context.Context, old, new *v1alpha1.
 	return nil
 }
 
-// Delete attemps to delete a bucketAccess. This function must be idempotent
+// Delete attempts to delete a bucketAccess. This function must be idempotent
 // Return values
 //   - nil - BucketAccess successfully deleted
 //   - non-nil err - Internal error                                [requeue'd with exponential backoff]

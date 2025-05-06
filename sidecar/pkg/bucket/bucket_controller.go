@@ -264,7 +264,7 @@ func (b *BucketListener) Update(ctx context.Context, old, new *v1alpha1.Bucket) 
 	return nil
 }
 
-// Delete attemps to delete a bucket. This function must be idempotent
+// Delete attempts to delete a bucket. This function must be idempotent
 // Delete function is called when the bucket was not able to add finalizers while creation.
 // Hence we will take care of removing the BucketClaim finalizer before deleting the Bucket object.
 // Return values

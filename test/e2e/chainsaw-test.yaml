@@ -253,7 +253,7 @@ spec:
                     items:
                     - key: BucketInfo
                       path: BucketInfo
-  - name: Check if ObjectStorage validation tool completed succesfully
+  - name: Check if ObjectStorage validation tool completed successfully
     try:
     - assert:
         resource:

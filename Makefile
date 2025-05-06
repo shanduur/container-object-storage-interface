@@ -87,9 +87,11 @@ test-e2e: chainsaw # Run e2e tests against the K8s cluster specified in ~/.kube/
 	$(CHAINSAW) test --values ./test/e2e/values.yaml
 
 .PHONY: lint
-lint: golangci-lint.client golangci-lint.controller golangci-lint.sidecar ## Run all linters (suggest `make -k`)
+lint: golangci-lint.client golangci-lint.controller golangci-lint.sidecar spell-lint ## Run all linters (suggest `make -k`)
 golangci-lint.%: golangci-lint
 	cd $* && $(GOLANGCI_LINT) run $(GOLANGCI_LINT_RUN_OPTS) --config $(CURDIR)/.golangci.yaml --new
+spell-lint:
+	git ls-files | grep -v -e CHANGELOG -e go.mod -e go.sum -e vendor | xargs $(SPELL_LINT) -i "Creater,creater,ect" -error -o stderr
 
 .PHONY: lint-fix
 lint-fix: golangci-lint-fix.client golangci-lint-fix.controller golangci-lint-fix.sidecar ## Run all linters and perform fixes where possible (suggest `make -k`)
@@ -167,6 +169,7 @@ GOLANGCI_LINT ?= $(TOOLBIN)/golangci-lint
 KIND          ?= $(TOOLBIN)/kind
 KUSTOMIZE     ?= $(TOOLBIN)/kustomize
 MDBOOK        ?= $(TOOLBIN)/mdbook
+SPELL_LINT    ?= $(TOOLBIN)/spell-lint
 
 # Tool Versions
 CHAINSAW_VERSION      ?= v0.2.12
@@ -176,6 +179,7 @@ GOLANGCI_LINT_VERSION ?= v1.64.7
 KIND_VERSION          ?= v0.27.0
 KUSTOMIZE_VERSION     ?= v5.6.0
 MDBOOK_VERSION        ?= v0.4.47
+SPELL_LINT_VERSION    ?= v0.6.0
 
 .PHONY: chainsaw
 chainsaw: $(CHAINSAW)-$(CHAINSAW_VERSION)
@@ -211,6 +215,11 @@ $(KUSTOMIZE)-$(KUSTOMIZE_VERSION): $(TOOLBIN)
 mdbook: $(MDBOOK)-$(MDBOOK_VERSION)
 $(MDBOOK)-$(MDBOOK_VERSION): $(TOOLBIN)
 	./hack/tools/install-mdbook.sh $(MDBOOK) $(MDBOOK_VERSION)
+
+.PHONY: spell-lint
+spell-lint: $(SPELL_LINT)-$(SPELL_LINT_VERSION)
+$(SPELL_LINT)-$(SPELL_LINT_VERSION): $(TOOLBIN)
+	./hack/tools/install-misspell-lint.sh $(TOOLBIN) $(SPELL_LINT) $(SPELL_LINT_VERSION)
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary

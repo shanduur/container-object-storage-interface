@@ -68,6 +68,12 @@ func NewBucketAccessListener(driverName string, client cosi.ProvisionerClient) *
 func (bal *BucketAccessListener) Add(ctx context.Context, inputBucketAccess *v1alpha1.BucketAccess) error {
 	bucketAccess := inputBucketAccess.DeepCopy()
 
+	if !bucketAccess.GetDeletionTimestamp().IsZero() {
+		klog.V(3).InfoS("BucketAccess has deletion timestamp, handling deletion",
+			"name", bucketAccess.ObjectMeta.Name)
+		return bal.deleteBucketAccessOp(ctx, bucketAccess)
+	}
+
 	if bucketAccess.Status.AccessGranted && bucketAccess.Status.AccountID != "" {
 		klog.V(3).InfoS("BucketAccess already exists", bucketAccess.ObjectMeta.Name)
 		return nil
@@ -310,9 +316,12 @@ func (bal *BucketAccessListener) Update(ctx context.Context, old, new *v1alpha1.
 
 	bucketAccess := new.DeepCopy()
 	if !bucketAccess.GetDeletionTimestamp().IsZero() {
-		err := bal.deleteBucketAccessOp(ctx, bucketAccess)
-		if err != nil {
+		if err := bal.deleteBucketAccessOp(ctx, bucketAccess); err != nil {
 			return bal.recordError(bucketAccess, v1.EventTypeWarning, v1alpha1.FailedRevokeAccess, err)
+		}
+	} else {
+		if err := bal.Add(ctx, bucketAccess); err != nil {
+			return bal.recordError(bucketAccess, v1.EventTypeWarning, v1alpha1.FailedGrantAccess, err)
 		}
 	}
 

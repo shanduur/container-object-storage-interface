@@ -502,3 +502,94 @@ func TestRecordEvents(t *testing.T) {
 func newEvent(eventType, reason, message string) string {
 	return fmt.Sprintf("%s %s %s", eventType, reason, message)
 }
+
+// TestAddDeletedBucketAccess tests that a deleted BucketAccess does not
+// trigger a call to the driver to grant access, and that no secrets are created.
+func TestAddDeletedBucketAccess(t *testing.T) {
+	driver := "driver"
+	baName := "bucketaccess-deleted"
+	ns := "testns"
+
+	mpc := struct{ fakespec.FakeProvisionerClient }{}
+	mpc.FakeDriverGrantBucketAccess = func(
+		_ context.Context,
+		_ *cosi.DriverGrantBucketAccessRequest,
+		_ ...grpc.CallOption,
+	) (*cosi.DriverGrantBucketAccessResponse, error) {
+		t.Fatalf("driver Grant should NOT be called on deleted BA")
+		return nil, nil
+	}
+	mpc.FakeDriverRevokeBucketAccess = func(
+		_ context.Context,
+		_ *cosi.DriverRevokeBucketAccessRequest,
+		_ ...grpc.CallOption,
+	) (*cosi.DriverRevokeBucketAccessResponse, error) {
+		return &cosi.DriverRevokeBucketAccessResponse{}, nil
+	}
+
+	// minimal stub objects just to satisfy look-ups inside delete-path
+	bac := &v1alpha1.BucketAccessClass{
+		ObjectMeta: metav1.ObjectMeta{Name: "bac"},
+		DriverName: driver,
+	}
+	claim := &v1alpha1.BucketClaim{
+		ObjectMeta: metav1.ObjectMeta{Name: "claim", Namespace: ns},
+		Status: v1alpha1.BucketClaimStatus{
+			BucketReady: true,
+			BucketName:  "bucket",
+		},
+	}
+	bucket := &v1alpha1.Bucket{
+		ObjectMeta: metav1.ObjectMeta{Name: "bucket"},
+		Status: v1alpha1.BucketStatus{
+			BucketReady: true,
+			BucketID:    "id",
+		},
+	}
+
+	now := metav1.Now()
+	ba := &v1alpha1.BucketAccess{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:              baName,
+			Namespace:         ns,
+			DeletionTimestamp: &now,
+			Finalizers:        []string{consts.BAFinalizer},
+		},
+		Spec: v1alpha1.BucketAccessSpec{
+			BucketClaimName:       claim.Name,
+			BucketAccessClassName: bac.Name,
+			CredentialsSecretName: "creds",
+		},
+		Status: v1alpha1.BucketAccessStatus{
+			AccountID:     "acc",
+			AccessGranted: true,
+		},
+	}
+
+	secret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:       "creds",
+			Namespace:  ns,
+			Finalizers: []string{consts.SecretFinalizer},
+		},
+		StringData: map[string]string{"dummy": "val"},
+	}
+
+	client := fakebucketclientset.NewSimpleClientset(bac, claim, bucket, ba)
+	kubeClient := fakekubeclientset.NewSimpleClientset(secret)
+
+	bal := BucketAccessListener{
+		driverName:        driver,
+		provisionerClient: &mpc,
+		bucketClient:      client,
+		kubeClient:        kubeClient,
+	}
+
+	if err := bal.Add(context.TODO(), ba); err != nil {
+		t.Fatalf("Add returned error for deleted BucketAccess: %v", err)
+	}
+
+	if _, err := bal.secrets(ns).Get(context.TODO(), "creds", metav1.GetOptions{}); !kubeerrors.IsNotFound(err) {
+		t.Fatalf("secret was not cleaned up, err=%v", err)
+	}
+}

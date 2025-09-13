@@ -1,52 +1,50 @@
-![version](https://img.shields.io/badge/status-pre--alpha-lightgrey) ![apiVersion](https://img.shields.io/badge/apiVersion-v1alpha1-lightgreen)
-
+![status](https://img.shields.io/badge/status-pre--alpha-lightblue)
+![apiVersion](https://img.shields.io/badge/apiVersion-v1alpha2-lightblue)
+[![docs](https://img.shields.io/badge/docs-latest-lightblue)](https://container-object-storage-interface.sigs.k8s.io/)
 
 # Container Object Storage Interface
 
 This repository hosts the Container Object Storage Interface (COSI) project.
 
+> [!IMPORTANT]
+> This `main` branch contains pre-alpha code and APIs for COSI `v1alpha2`.<br>
+> For `v1alpha1` APIs, code, or development, use branch `release-0.2`
+
 ## Documentation
 
 To deploy, run `kubectl apply -k .`
 
-## Developer Guide
-
-All API definitions are in [`client/apis/objectstorage`](./client/apis/objectstorage/). All API changes **_MUST_** satisfy the following requirements:
-
-- Must be backwards compatible
-- Must be in-sync with the API definitions in [sigs.k8s.io/container-object-storage-interface-spec](https://sigs.k8s.io/container-object-storage-interface-spec)
-
-### Build and Test
-
-See `make help` for assistance
-
-## Adding new fields to protocols
-
-Create a new issue raising a RFC for the changes following this format:
-
-**Title:** [RFC] Changes to protocol xyz
-
-**Description:**
-> 1. Protocol:
-> 2. Fields Added:
-> 3. Why is this change necessary?
->    ...(describe why here)...
-> 4. Which other COSI projects are affected by this change?
-> 5. Upgrade plan
->    (ignore if it doesn't apply)
+Documentation can be found under: https://container-object-storage-interface.sigs.k8s.io/
 
 ## References
 
- - Weekly Meetings: Thursdays from 13:30 to 14:00 US Eastern Time
- - [Roadmap](https://github.com/orgs/kubernetes-sigs/projects/63/)
+- [Weekly meetings](https://www.kubernetes.dev/resources/calendar/): Thursdays from 13:30 to 14:00 US Eastern Time
+- [Roadmap](https://github.com/orgs/kubernetes-sigs/projects/63/)
 
 ## Community, discussion, contribution, and support
 
 You can reach the maintainers of this project at:
 
- - [#sig-storage-cosi](https://kubernetes.slack.com/messages/sig-storage-cosi) slack channel
- - [container-object-storage-interface](https://groups.google.com/g/container-object-storage-interface-wg?pli=1) mailing list
+- [#sig-storage-cosi](https://kubernetes.slack.com/messages/sig-storage-cosi) Slack channel **(preferred)**
+- [GitHub Issues](https://github.com/kubernetes-sigs/container-object-storage-interface/issues)
+- [container-object-storage-interface](https://groups.google.com/g/container-object-storage-interface-wg) mailing list
 
 ### Code of conduct
 
 Participation in the Kubernetes community is governed by the [Kubernetes Code of Conduct](code-of-conduct.md).
+
+## Developer Guide
+
+Before contributing a Pull Request, ensure a [GitHub
+issue](https://github.com/kubernetes-sigs/container-object-storage-interface/issues) exists corresponding to the change.
+
+All API definitions and behavior must follow the [`v1alpha2` KEP PR](https://github.com/kubernetes/enhancements/pull/4599).
+Minor deviation from the KEP is acceptable in order to fix bugs.
+
+`v1alpha2` is currently pre-release.
+Changes may break compatibility up until `v1alpha2` is released with a semver tag.
+After the first `v1alpha2` semver release (e.g., 0.3.0), all changes must be backwards compatible.
+
+### Build and Test
+
+See `make help` for assistance

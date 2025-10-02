@@ -48,17 +48,22 @@ SIDECAR_TAG ?= cosi-provisioner-sidecar:latest
 ##@ Development
 
 .PHONY: generate
-generate: controller-gen controller/Dockerfile sidecar/Dockerfile ## Generate files
+generate: crds controller/Dockerfile sidecar/Dockerfile ## Generate files
+
+.PHONY: crds
+crds: controller-gen
 	cd ./client && $(CONTROLLER_GEN) rbac:roleName=manager-role crd paths="./apis/objectstorage/..."
-	# $(MAKE) -C client crds
-	$(MAKE) -C proto generate
 
 %/Dockerfile: hack/Dockerfile.in hack/gen-dockerfile.sh
 	hack/gen-dockerfile.sh $* > "$@"
 
 .PHONY: codegen
-codegen: controller-gen ## Generate code
+codegen: codegen.client codegen.proto  ## Generate code
+
+.PHONY: codegen.client codegen.proto
+codegen.client: controller-gen
 	cd ./client && $(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./apis/objectstorage/..."
+codegen.proto:
 	$(MAKE) -C proto codegen
 
 .PHONY: fmt
@@ -97,12 +102,24 @@ lint-fix: golangci-lint-fix.client golangci-lint-fix.controller golangci-lint-fi
 golangci-lint-fix.%: golangci-lint
 	cd $* && $(GOLANGCI_LINT) run $(GOLANGCI_LINT_RUN_OPTS) --config $(CURDIR)/.golangci.yaml --new --fix
 
+.PHONY: vendor
+vendor: tidy.client tidy.proto ## Update go vendor dir
+	go mod tidy
+	go mod vendor
+tidy.%: FORCE
+	cd $* && go mod tidy
+
 ##@ Build
 
-.PHONY: all .gen
+.PHONY: all
+.NOTPARALLEL: all # all generators must run before build
+all: prebuild build ## Build all container images, plus their prerequisites (faster with 'make -j')
+
+.PHONY: prebuild .gen .doc-vendor
 .gen: generate codegen # can be done in parallel with 'make -j'
-.NOTPARALLEL: all # codegen must be finished before fmt/vet
-all: .gen fmt vet build ## Build all container images, plus their prerequisites (faster with 'make -j')
+.doc-vendor: build-docs vendor # can be done in parallel
+.NOTPARALLEL: prebuild # codegen must be finished before fmt
+prebuild: .gen fmt .doc-vendor ## Run all pre-build prerequisite steps (faster with 'make -j')
 
 .PHONY: build
 build: build.controller build.sidecar ## Build container images without prerequisites
@@ -115,7 +132,6 @@ build.sidecar: sidecar/Dockerfile ## Build only the sidecar container image
 
 .PHONY: build-docs
 build-docs: generate crd-ref-docs mdbook
-	@echo "build-docs is temporarily disabled for v1alpha2 development"
 	$(CRD_REF_DOCS) \
 		--config=./docs/.crd-ref-docs.yaml \
 		--source-path=./client/apis \
@@ -180,7 +196,7 @@ SPELL_LINT     ?= $(TOOLBIN)/spell-lint
 # Tool Versions
 CHAINSAW_VERSION         ?= v0.2.12
 CONTROLLER_TOOLS_VERSION ?= v0.19.0
-CRD_REF_DOCS_VERSION     ?= v0.1.0
+CRD_REF_DOCS_VERSION     ?= v0.2.0
 CTLPTL_VERSION           ?= v0.8.39
 GOLANGCI_LINT_VERSION    ?= v1.64.7
 KIND_VERSION             ?= v0.27.0

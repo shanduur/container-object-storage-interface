@@ -286,7 +286,7 @@ message S3BucketInfo {
     // Geographical region where the S3 server is running.
     string region = 3;
 
-    // sS3 signature version for signing all s3 requests.
+    // S3 signature version for signing all S3 requests.
     S3SignatureVersion signature_version = 4;
 }
 
@@ -298,7 +298,7 @@ message S3AccessInfo {
     string access_secret_key = 2;
 }
 
-// S3SignatureVersion is the version of the signing algorithm for all s3 requests
+// S3SignatureVersion is the version of the signing algorithm for all S3 requests
 message S3SignatureVersion {
     enum Version {
         UNKNOWN = 0;

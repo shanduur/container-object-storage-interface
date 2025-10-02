@@ -280,7 +280,7 @@ type S3BucketInfo struct {
 	BucketId string `protobuf:"bytes,2,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`
 	// Geographical region where the S3 server is running.
 	Region string `protobuf:"bytes,3,opt,name=region,proto3" json:"region,omitempty"`
-	// sS3 signature version for signing all S3 requests.
+	// S3 signature version for signing all S3 requests.
 	SignatureVersion *S3SignatureVersion `protobuf:"bytes,4,opt,name=signature_version,json=signatureVersion,proto3" json:"signature_version,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache

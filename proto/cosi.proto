@@ -130,7 +130,6 @@ message ObjectProtocol {
     Type type = 1;
 }
 
-
 message S3BucketInfo {
     // S3 endpoint URL.
     string endpoint = 1;
@@ -141,7 +140,7 @@ message S3BucketInfo {
     // Geographical region where the S3 server is running.
     string region = 3;
 
-    // sS3 signature version for signing all S3 requests.
+    // S3 signature version for signing all S3 requests.
     S3SignatureVersion signature_version = 4;
 }
 

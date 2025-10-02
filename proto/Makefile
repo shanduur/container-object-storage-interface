@@ -129,9 +129,6 @@ help: ## Display this help.
 
 ##@ Development
 
-.PHONY: generate
-generate: $(COSI_PROTO) ## Generate cosi.proto
-
 .PHONY: codegen
 codegen: $(COSI_GO) $(COSI_GO_GRPC) $(COSI_GO_JSON) $(COSI_GO_FAKE) ## Generate protobuf files
 

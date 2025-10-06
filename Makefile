@@ -116,12 +116,12 @@ build.sidecar: sidecar/Dockerfile ## Build only the sidecar container image
 .PHONY: build-docs
 build-docs: generate crd-ref-docs mdbook
 	@echo "build-docs is temporarily disabled for v1alpha2 development"
-# 	$(CRD_REF_DOCS) \
-# 		--config=./docs/.crd-ref-docs.yaml \
-# 		--source-path=./client/apis \
-# 		--renderer=markdown \
-# 		--output-path=./docs/src/api/
-# 	cd docs; $(MDBOOK) build
+	$(CRD_REF_DOCS) \
+		--config=./docs/.crd-ref-docs.yaml \
+		--source-path=./client/apis \
+		--renderer=markdown \
+		--output-path=./docs/src/api/
+	cd docs; $(MDBOOK) build
 
 MDBOOK_PORT ?= 3000
 

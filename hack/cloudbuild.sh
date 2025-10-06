@@ -16,7 +16,7 @@ CONTROLLER_IMAGE="${REPO}/objectstorage-controller"
 SIDECAR_IMAGE="${REPO}/objectstorage-sidecar"
 
 # args to 'make build'
-export DOCKER="/buildx-entrypoint" # available in gcr.io/k8s-testimages/gcb-docker-gcloud image
+export DOCKER="/buildx-entrypoint" # available in gcr.io/k8s-staging-test-infra/gcb-docker-gcloud image
 export PLATFORM
 export SIDECAR_TAG="${SIDECAR_IMAGE}:${GIT_TAG}"
 export CONTROLLER_TAG="${CONTROLLER_IMAGE}:${GIT_TAG}"

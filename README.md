@@ -35,9 +35,6 @@ Participation in the Kubernetes community is governed by the [Kubernetes Code of
 
 ## Developer Guide
 
-Before contributing a Pull Request, ensure a [GitHub
-issue](https://github.com/kubernetes-sigs/container-object-storage-interface/issues) exists corresponding to the change.
-
 All API definitions and behavior must follow the [`v1alpha2` KEP PR](https://github.com/kubernetes/enhancements/pull/4599).
 Minor deviation from the KEP is acceptable in order to fix bugs.
 
@@ -45,6 +42,5 @@ Minor deviation from the KEP is acceptable in order to fix bugs.
 Changes may break compatibility up until `v1alpha2` is released with a semver tag.
 After the first `v1alpha2` semver release (e.g., 0.3.0), all changes must be backwards compatible.
 
-### Build and Test
-
-See `make help` for assistance
+Before making a COSI contribution, please read and follow the
+[core developer guide](https://container-object-storage-interface.sigs.k8s.io/developing/core.html).

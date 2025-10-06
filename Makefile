@@ -17,8 +17,8 @@
 SHELL = /usr/bin/env bash
 
 .PHONY: help
-help: ## Display this help.
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
+help: ## Display this help
+	@awk 'BEGIN {FS = " *:.*## *"; printf "\nUsage:\n  make \033[36m<target>\033[0m [\033[32mVAR\033[0m=val]\n"} /^##.*:##/ { gsub(/^## /,"",$$1) ; printf "  \033[32m%s\033[0m (\"%s\")\n    └ %s\n", $$1, ENVIRON[$$1], $$2} /^[.a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 # If GOARCH is not set in the env, find it
 GOARCH ?= $(shell go env GOARCH)
@@ -27,66 +27,33 @@ GOARCH ?= $(shell go env GOARCH)
 # ==== ARGS =====
 #
 
-# Container build tool compatible with `docker` API
+##@ Environment args
+
+## DOCKER :## Container build tool compatible with `docker` API
 DOCKER ?= docker
 
-# Tool compatible with `kubectl` API
+## KUBECTL :## Tool compatible with `kubectl` API
 KUBECTL ?= kubectl
 
-# Platform for 'build'
+## PLATFORM :## Platform for builds
 PLATFORM ?= linux/$(GOARCH)
 
-# Additional args for 'build'
+## BUILD_ARGS :## Additional args for builds
 BUILD_ARGS ?=
 
-# Image tag for controller image build
+## CONTROLLER_TAG :## Image tag for controller image build and deploy
 CONTROLLER_TAG ?= cosi-controller:latest
 
-# Image tag for sidecar image build
+## SIDECAR_TAG :## Image tag for sidecar image build
 SIDECAR_TAG ?= cosi-provisioner-sidecar:latest
 
-##@ Development
+export
 
-.PHONY: generate
-generate: crds controller/Dockerfile sidecar/Dockerfile ## Generate files
+##@ Core (Basic)
 
-.PHONY: crds
-crds: controller-gen
-	cd ./client && $(CONTROLLER_GEN) rbac:roleName=manager-role crd paths="./apis/objectstorage/..."
-
-%/Dockerfile: hack/Dockerfile.in hack/gen-dockerfile.sh
-	hack/gen-dockerfile.sh $* > "$@"
-
-.PHONY: codegen
-codegen: codegen.client codegen.proto  ## Generate code
-
-.PHONY: codegen.client codegen.proto
-codegen.client: controller-gen
-	cd ./client && $(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./apis/objectstorage/..."
-codegen.proto:
-	$(MAKE) -C proto codegen
-
-.PHONY: fmt
-fmt: fmt.client fmt.controller fmt.sidecar ## Format code
-fmt.%: FORCE
-	cd $* && go fmt ./...
-
-.PHONY: vet
-vet: vet.client vet.controller vet.sidecar ## Vet code
-vet.%: FORCE
-	cd $* && go vet ./...
-
-.PHONY: test
-test: .test.proto test.client test.controller test.sidecar ## Run all unit tests including vet and fmt
-test.%: fmt.% vet.% FORCE
-	cd $* && go test ./...
-.PHONY: .test.proto
-.test.proto: # gRPC proto has a special unit test
-	$(MAKE) -C proto check
-
-.PHONY: test-e2e
-test-e2e: chainsaw # Run e2e tests against the K8s cluster specified in ~/.kube/config. It requires both controller and driver deployed. If you need to create a cluster beforehand, consider using 'cluster' and 'deploy' targets.
-	$(CHAINSAW) test --values ./test/e2e/values.yaml
+.PHONY: all
+.NOTPARALLEL: all # all generators must run before build
+all: prebuild build ## Build all container images, plus their prerequisites (faster with 'make -j')
 
 .PHONY: lint
 lint: golangci-lint.client golangci-lint.controller golangci-lint.sidecar spell-lint dockerfiles-lint ## Run all linters (suggest `make -k`)
@@ -102,22 +69,29 @@ lint-fix: golangci-lint-fix.client golangci-lint-fix.controller golangci-lint-fi
 golangci-lint-fix.%: golangci-lint
 	cd $* && $(GOLANGCI_LINT) run $(GOLANGCI_LINT_RUN_OPTS) --config $(CURDIR)/.golangci.yaml --new --fix
 
-.PHONY: vendor
-vendor: tidy.client tidy.proto ## Update go vendor dir
-	go mod tidy
-	go mod vendor
-tidy.%: FORCE
-	cd $* && go mod tidy
+.PHONY: test
+test: .test.proto test.client test.controller test.sidecar ## Run all unit tests including vet and fmt
+test.%: fmt.% vet.% FORCE
+	cd $* && go test ./...
+.PHONY: .test.proto
+.test.proto: # gRPC proto has a special unit test
+	$(MAKE) -C proto check
 
-##@ Build
+.PHONY: clean
+clean: ## Clean build environment
+	$(MAKE) -C proto clean
 
-.PHONY: all
-.NOTPARALLEL: all # all generators must run before build
-all: prebuild build ## Build all container images, plus their prerequisites (faster with 'make -j')
+.PHONY: clobber
+clobber: ## Clean build environment and cached tools
+	$(MAKE) -C proto clobber
+	rm -rf $(TOOLBIN)
+	rm -rf $(CURDIR)/.cache
+
+##@ Development (Advanced)
 
 .PHONY: prebuild .gen .doc-vendor
 .gen: generate codegen # can be done in parallel with 'make -j'
-.doc-vendor: build-docs vendor # can be done in parallel
+.doc-vendor: docs vendor # can be done in parallel
 .NOTPARALLEL: prebuild # codegen must be finished before fmt
 prebuild: .gen fmt .doc-vendor ## Run all pre-build prerequisite steps (faster with 'make -j')
 
@@ -130,8 +104,37 @@ build.controller: controller/Dockerfile ## Build only the controller container i
 build.sidecar: sidecar/Dockerfile ## Build only the sidecar container image
 	$(DOCKER) build --file sidecar/Dockerfile --platform $(PLATFORM) $(BUILD_ARGS) --tag $(SIDECAR_TAG) .
 
-.PHONY: build-docs
-build-docs: generate crd-ref-docs mdbook
+.PHONY: generate
+generate: crds controller/Dockerfile sidecar/Dockerfile ## Generate files
+
+.PHONY: crds
+crds: controller-gen
+	cd ./client && $(CONTROLLER_GEN) rbac:roleName=manager-role crd paths="./apis/objectstorage/..."
+
+%/Dockerfile: hack/Dockerfile.in hack/gen-dockerfile.sh
+	hack/gen-dockerfile.sh $* > "$@"
+
+.PHONY: codegen
+codegen: codegen.client codegen.proto ## Generate code
+
+.PHONY: codegen.client codegen.proto
+codegen.client: controller-gen
+	cd ./client && $(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./apis/objectstorage/..."
+codegen.proto:
+	$(MAKE) -C proto codegen
+
+.PHONY: fmt
+fmt: fmt.client fmt.controller fmt.sidecar
+fmt.%: FORCE
+	cd $* && go fmt ./...
+
+.PHONY: vet
+vet: vet.client vet.controller vet.sidecar
+vet.%: FORCE
+	cd $* && go vet ./...
+
+.PHONY: docs
+docs: generate crd-ref-docs mdbook ## Build docs
 	$(CRD_REF_DOCS) \
 		--config=./docs/.crd-ref-docs.yaml \
 		--source-path=./client/apis \
@@ -141,21 +144,21 @@ build-docs: generate crd-ref-docs mdbook
 
 MDBOOK_PORT ?= 3000
 
-.PHONY: serve-docs
-serve-docs: generate mdbook build-docs
+.PHONY: docs.serve
+docs.serve: generate mdbook docs ## Serve locally built docs
 	cd docs; $(MDBOOK) serve --port $(MDBOOK_PORT)
 
-.PHONY: clean
-clean: ## Clean build environment
-	$(MAKE) -C proto clean
+.PHONY: vendor
+vendor: tidy.client tidy.proto ## Update go vendor dir
+	go mod tidy
+	go mod vendor
+tidy.%: FORCE
+	cd $* && go mod tidy
 
-.PHONY: clobber
-clobber: ## Clean build environment and cached tools
-	$(MAKE) -C proto clobber
-	rm -rf $(TOOLBIN)
-	rm -rf $(CURDIR)/.cache
+.PHONY: test-e2e
+test-e2e: chainsaw ## Run e2e tests against the local K8s cluster (requires both controller and driver deployed)
 
-##@ Deployment
+##@ Deployment (Advanced)
 
 .PHONY: cluster
 cluster: kind ctlptl ## Create Kind cluster and local registry
@@ -166,12 +169,12 @@ cluster-reset: kind ctlptl ## Delete Kind cluster
 	PATH=$(TOOLBIN):$(PATH) $(CTLPTL) delete -f ctlptl.yaml
 
 .PHONY: deploy
-deploy: kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config
-	$(KUSTOMIZE) build . | $(KUBECTL) apply -f -
+deploy: kustomize ## Deploy controller (CONTROLLER_TAG) to the local K8s cluster
+	./hack/dev-kustomize.sh && $(KUSTOMIZE) build $(CURDIR)/.cache | $(KUBECTL) apply -f -
 
 .PHONY: undeploy
-undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config
-	$(KUSTOMIZE) build . | $(KUBECTL) delete --ignore-not-found=true -f -
+undeploy: kustomize ## Undeploy controller (CONTROLLER_TAG) from the local K8s cluster
+	./hack/dev-kustomize.sh && $(KUSTOMIZE) build $(CURDIR)/.cache | $(KUBECTL) delete --ignore-not-found=true -f -
 
 #
 # ===== Tools =====

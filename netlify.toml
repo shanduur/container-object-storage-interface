@@ -1,6 +1,6 @@
 # Netlify build instructions
 [build]
-    command = "make build-docs"
+    command = "make docs"
     publish = "docs/book"
 
 [build.environment]

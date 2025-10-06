@@ -23,5 +23,4 @@ spec:
       containers:
         - name: objectstorage-controller
           image: gcr.io/k8s-staging-sig-storage/objectstorage-controller:v20251003-controllerv0.2.0-rc1-145-ge3bc25e
-          args:
-            - "--v=5"
+          args: []

@@ -56,12 +56,11 @@ trap 'rm -rf "$TEMP"' EXIT
 
 cd "${TEMP}"
 
-TEMPLATE='<div id="version" class="version">\n  VERSION-PLACEHOLDER\n</div>'
+TEMPLATE='<div id="version" class="version">VERSION-PLACEHOLDER</div>'
 
 "${MDBOOK}" init --theme --title "template" --ignore "none"
 
-cp theme/index.hbs "${CURDIR}/docs/theme/index-template.hbs"
-sed -i "/<div id=\"content\" class=\"content\">/i ${TEMPLATE}" "${CURDIR}/docs/theme/index-template.hbs"
-
+sed -e "/<div id=\"content\" class=\"content\">/i\\
+${TEMPLATE}" theme/index.hbs > "${CURDIR}/docs/theme/index-template.hbs"
 
 echo "$("${MDBOOK}" --version) installed successfully!"

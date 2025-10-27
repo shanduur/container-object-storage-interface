@@ -23,6 +23,7 @@ This file describes the end-user representation of the various object store prot
 // TODO: can we write doc generation and linting for the definitions in this file?
 
 // ObjectProtocol represents an object protocol type.
+// +kubebuilder:validation:Enum:=S3;Azure;GCS
 type ObjectProtocol string
 
 const (

@@ -22,11 +22,15 @@ import (
 
 // BucketClaimSpec defines the desired state of BucketClaim
 // +kubebuilder:validation:ExactlyOneOf=bucketClassName;existingBucketName
+// +kubebuilder:validation:XValidation:message="bucketClassName is immutable",rule="has(oldSelf.bucketClassName) == has(self.bucketClassName)"
+// +kubebuilder:validation:XValidation:message="existingBucketName is immutable",rule="has(oldSelf.existingBucketName) == has(self.existingBucketName)"
+// +kubebuilder:validation:XValidation:message="protocols list is immutable",rule="has(oldSelf.protocols) == has(self.protocols)"
 type BucketClaimSpec struct {
 	// bucketClassName selects the BucketClass for provisioning the BucketClaim.
 	// This field is used only for BucketClaim dynamic provisioning.
 	// If unspecified, existingBucketName must be specified for binding to an existing Bucket.
 	// +optional
+	// +kubebuilder:validation:MaxLength=253
 	// +kubebuilder:validation:XValidation:message="bucketClassName is immutable",rule="self == oldSelf"
 	BucketClassName string `json:"bucketClassName,omitempty"`
 
@@ -41,15 +45,19 @@ type BucketClaimSpec struct {
 	// This field is used only for BucketClaim static provisioning.
 	// If unspecified, bucketClassName must be specified for dynamically provisioning a new bucket.
 	// +optional
+	// +kubebuilder:validation:MaxLength=253
 	// +kubebuilder:validation:XValidation:message="existingBucketName is immutable",rule="self == oldSelf"
 	ExistingBucketName string `json:"existingBucketName,omitempty"`
 }
 
 // BucketClaimStatus defines the observed state of BucketClaim.
+// +kubebuilder:validation:XValidation:message="boundBucketName is immutable once set",rule="!has(oldSelf.boundBucketName) || has(self.boundBucketName)"
+// +kubebuilder:validation:XValidation:message="protocols is immutable once set",rule="!has(oldSelf.protocols) || has(self.protocols)"
 type BucketClaimStatus struct {
 	// boundBucketName is the name of the Bucket this BucketClaim is bound to.
-	// Once set, this is immutable.
-	// +kubebuilder:validation:XValidation:message="boundBucketName is immutable",rule="oldSelf == '' || self == oldSelf"
+	// +optional
+	// +kubebuilder:validation:MaxLength=253
+	// +kubebuilder:validation:XValidation:message="boundBucketName is immutable once set",rule="oldSelf == '' || self == oldSelf"
 	BoundBucketName string `json:"boundBucketName"`
 
 	// readyToUse indicates that the bucket is ready for consumption by workloads.

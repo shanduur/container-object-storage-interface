@@ -37,6 +37,9 @@ const (
 )
 
 // BucketSpec defines the desired state of Bucket
+// +kubebuilder:validation:XValidation:message="parameters map is immutable",rule="has(oldSelf.parameters) == has(self.parameters)"
+// +kubebuilder:validation:XValidation:message="protocols list is immutable",rule="has(oldSelf.protocols) == has(self.protocols)"
+// +kubebuilder:validation:XValidation:message="existingBucketID is immutable",rule="has(oldSelf.existingBucketID) == has(self.existingBucketID)"
 type BucketSpec struct {
 	// driverName is the name of the driver that fulfills requests for this Bucket.
 	// +required
@@ -81,11 +84,14 @@ type BucketSpec struct {
 }
 
 // BucketClaimReference is a reference to a BucketClaim object.
+// +kubebuilder:validation:XValidation:message="namespace is immutable once set",rule="!has(oldSelf.namespace) || has(self.namespace)"
+// +kubebuilder:validation:XValidation:message="uid is immutable once set",rule="!has(oldSelf.uid) || has(self.uid)"
 type BucketClaimReference struct {
 	// name is the name of the BucketClaim being referenced.
 	// +required
 	// +kubebuilder:validation:MinLength=1
-	// +kubebuilder:validation:XValidation:message="driverName is immutable",rule="self == oldSelf"
+	// +kubebuilder:validation:MaxLength=253
+	// +kubebuilder:validation:XValidation:message="name is immutable",rule="self == oldSelf"
 	Name string `json:"name"`
 
 	// namespace is the namespace of the BucketClaim being referenced.
@@ -93,24 +99,26 @@ type BucketClaimReference struct {
 	// namespace is immutable except to update '' to 'default'.
 	// +optional
 	// +kubebuilder:validation:MinLength=0
-	// +kubebuilder:validation:XValidation:message="driverName is immutable",rule="(oldSelf == '' && self == 'default') || self == oldSelf"
+	// +kubebuilder:validation:MaxLength=253
+	// +kubebuilder:validation:XValidation:message="namespace is immutable",rule="(oldSelf == '' && self == 'default') || self == oldSelf"
 	Namespace string `json:"namespace"`
 
 	// uid is the UID of the BucketClaim being referenced.
-	// Once set, the UID is immutable.
 	// +optional
-	// +kubebuilder:validation:XValidation:message="driverName is immutable",rule="oldSelf == '' || self == oldSelf"
+	// +kubebuilder:validation:XValidation:message="uid is immutable once set",rule="oldSelf == '' || self == oldSelf"
 	UID types.UID `json:"uid"`
 }
 
 // BucketStatus defines the observed state of Bucket.
+// +kubebuilder:validation:XValidation:message="bucketID is immutable once set",rule="!has(oldSelf.bucketID) || has(self.bucketID)"
+// +kubebuilder:validation:XValidation:message="protocols is immutable once set",rule="!has(oldSelf.protocols) || has(self.protocols)"
 type BucketStatus struct {
 	// readyToUse indicates that the bucket is ready for consumption by workloads.
 	ReadyToUse bool `json:"readyToUse"`
 
 	// bucketID is the unique identifier for the backend bucket known to the driver.
-	// Once set, this is immutable.
-	// +kubebuilder:validation:XValidation:message="boundBucketName is immutable",rule="oldSelf == '' || self == oldSelf"
+	// +optional
+	// +kubebuilder:validation:XValidation:message="boundBucketName is immutable once set",rule="oldSelf == '' || self == oldSelf"
 	BucketID string `json:"bucketID"`
 
 	// protocols is the set of protocols the Bucket reports to support. BucketAccesses can request

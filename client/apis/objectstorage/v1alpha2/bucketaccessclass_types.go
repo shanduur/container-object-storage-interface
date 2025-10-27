@@ -20,42 +20,46 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
 // BucketAccessClassSpec defines the desired state of BucketAccessClass
 type BucketAccessClassSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	// The following markers will use OpenAPI v3 schema to validate the value
-	// More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
+	// driverName is the name of the driver that fulfills requests for this BucketAccessClass.
+	// +required
+	// +kubebuilder:validation:MinLength=1
+	DriverName string `json:"driverName"`
 
-	// foo is an example field of BucketAccessClass. Edit bucketaccessclass_types.go to remove/update
+	// authenticationType specifies which authentication mechanism is used bucket access.
+	// Possible values:
+	//  - Key: The driver should generate a protocol-appropriate access key that clients can use to
+	//    authenticate to the backend object store.
+	//  - ServiceAccount: The driver should configure the system such that Pods using the given
+	//    ServiceAccount authenticate to the backend object store automatically.
+	// +required
+	// +kubebuilder:validation:Enum:=Key;ServiceAccount
+	AuthenticationType BucketAccessAuthenticationType `json:"authenticationType"`
+
+	// parameters is an opaque map of driver-specific configuration items passed to the driver that
+	// fulfills requests for this BucketAccessClass.
 	// +optional
-	Foo *string `json:"foo,omitempty"`
+	Parameters map[string]string `json:"parameters,omitempty"`
+
+	// featureOptions can be used to adjust various COSI access provisioning behaviors.
+	// +optional
+	FeatureOptions BucketAccessFeatureOptions `json:"featureOptions,omitempty"`
 }
 
-// BucketAccessClassStatus defines the observed state of BucketAccessClass.
-type BucketAccessClassStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-
-	// For Kubernetes API conventions, see:
-	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
-
-	// conditions represent the current state of the BucketAccessClass resource.
-	// Each condition has a unique type and reflects the status of a specific aspect of the resource.
-	//
-	// Standard condition types include:
-	// - "Available": the resource is fully functional
-	// - "Progressing": the resource is being created or updated
-	// - "Degraded": the resource failed to reach or maintain its desired state
-	//
-	// The status of each condition is one of True, False, or Unknown.
-	// +listType=map
-	// +listMapKey=type
+// BucketAccessFeatureOptions defines various COSI access provisioning behaviors.
+type BucketAccessFeatureOptions struct {
+	// disallowedBucketAccessModes is a list of disallowed Read/Write access modes. A BucketAccess
+	// using this class will not be allowed to request access to a BucketClaim with any access mode
+	// listed here.
 	// +optional
-	Conditions []metav1.Condition `json:"conditions,omitempty"`
+	// +listType=set
+	DisallowedBucketAccessModes []BucketAccessMode `json:"disallowedBucketAccessModes,omitempty"`
+
+	// disallowMultiBucketAccess disables the ability for a BucketAccess to reference multiple
+	// BucketClaims when set.
+	// +optional
+	DisallowMultiBucketAccess bool `json:"disallowMultiBucketAccess,omitempty"`
 }
 
 // +kubebuilder:object:root=true
@@ -73,11 +77,8 @@ type BucketAccessClass struct {
 
 	// spec defines the desired state of BucketAccessClass
 	// +required
+	// +kubebuilder:validation:XValidation:message="BucketAccessClass spec is immutable",rule="self == oldSelf"
 	Spec BucketAccessClassSpec `json:"spec"`
-
-	// status defines the observed state of BucketAccessClass
-	// +optional
-	Status BucketAccessClassStatus `json:"status,omitempty,omitzero"`
 }
 
 // +kubebuilder:object:root=true

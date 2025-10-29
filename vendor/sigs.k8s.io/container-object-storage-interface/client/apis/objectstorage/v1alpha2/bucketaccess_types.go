@@ -167,7 +167,7 @@ type BucketClaimAccess struct {
 	AccessSecretName string `json:"accessSecretName"`
 }
 
-// AccessedBucket identifies a Bucket and corresponding access parameters.
+// AccessedBucket identifies a Bucket and correlates it to a BucketClaimAccess from the spec.
 type AccessedBucket struct {
 	// bucketName is the name of a Bucket the access should have permissions for.
 	// +required
@@ -175,9 +175,11 @@ type AccessedBucket struct {
 	// +kubebuilder:validation:MaxLength=253
 	BucketName string `json:"bucketName"`
 
-	// accessMode is the Read/Write access mode that the access should have for the bucket.
+	// bucketClaimName must match a BucketClaimAccess's BucketClaimName from the spec.
 	// +required
-	AccessMode BucketAccessMode `json:"accessMode"`
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=253
+	BucketClaimName string `json:"bucketClaimName"`
 }
 
 // +kubebuilder:object:root=true

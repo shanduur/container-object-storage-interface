@@ -26,7 +26,7 @@ Package v1alpha2 contains API Schema definitions for the objectstorage v1alpha2 
 
 
 
-AccessedBucket identifies a Bucket and corresponding access parameters.
+AccessedBucket identifies a Bucket and correlates it to a BucketClaimAccess from the spec.
 
 
 
@@ -36,7 +36,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `bucketName` _string_ | bucketName is the name of a Bucket the access should have permissions for. |  | MaxLength: 253 <br />MinLength: 1 <br /> |
-| `accessMode` _[BucketAccessMode](#bucketaccessmode)_ | accessMode is the Read/Write access mode that the access should have for the bucket. |  | Enum: [ReadWrite ReadOnly WriteOnly] <br /> |
+| `bucketClaimName` _string_ | bucketClaimName must match a BucketClaimAccess's BucketClaimName from the spec. |  | MaxLength: 253 <br />MinLength: 1 <br /> |
 
 
 #### Bucket
@@ -206,7 +206,6 @@ _Validation:_
 - Enum: [ReadWrite ReadOnly WriteOnly]
 
 _Appears in:_
-- [AccessedBucket](#accessedbucket)
 - [BucketAccessFeatureOptions](#bucketaccessfeatureoptions)
 - [BucketClaimAccess](#bucketclaimaccess)
 

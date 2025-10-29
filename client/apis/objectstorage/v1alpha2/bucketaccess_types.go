@@ -22,10 +22,12 @@ import (
 
 // BucketAccessAuthenticationType specifies what authentication mechanism is used for provisioning
 // bucket access.
+// +enum
+// +kubebuilder:validation:Enum:="";Key;ServiceAccount
 type BucketAccessAuthenticationType string
 
 const (
-	// The driver will generate a protocol-appropriate access key that clients can use to
+	// The driver should generate a protocol-appropriate access key that clients can use to
 	// authenticate to the backend object store.
 	BucketAccessAuthenticationTypeKey = "Key"
 
@@ -34,39 +36,148 @@ const (
 	BucketAccessAuthenticationTypeServiceAccount = "ServiceAccount"
 )
 
-// BucketAccessSpec defines the desired state of BucketAccess
-type BucketAccessSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
-	// The following markers will use OpenAPI v3 schema to validate the value
-	// More info: https://book.kubebuilder.io/reference/markers/crd-validation.html
+// BucketAccessMode describes the Read/Write mode an access should have for a bucket.
+// +enum
+// +kubebuilder:validation:Enum:=ReadWrite;ReadOnly;WriteOnly
+type BucketAccessMode string
 
-	// foo is an example field of BucketAccess. Edit bucketaccess_types.go to remove/update
+const (
+	// BucketAccessModeReadWrite represents read-write access mode.
+	BucketAccessModeReadWrite BucketAccessMode = "ReadWrite"
+
+	// BucketAccessModeReadOnly represents read-only access mode.
+	BucketAccessModeReadOnly BucketAccessMode = "ReadOnly"
+
+	// BucketAccessModeWriteOnly represents write-only access mode.
+	BucketAccessModeWriteOnly BucketAccessMode = "WriteOnly"
+)
+
+// BucketAccessSpec defines the desired state of BucketAccess
+// +kubebuilder:validation:XValidation:message="serviceAccountName is immutable",rule="has(oldSelf.serviceAccountName) == has(self.serviceAccountName)"
+type BucketAccessSpec struct {
+	// bucketClaims is a list of BucketClaims the provisioned access must have permissions for,
+	// along with per-BucketClaim access parameters and system output definitions.
+	// At least one BucketClaim must be referenced.
+	// Multiple references to the same BucketClaim are not permitted.
+	// +required
+	// +listType=map
+	// +listMapKey=bucketClaimName
+	// +kubebuilder:validation:MinItems=1
+	// +kubebuilder:validation:XValidation:message="bucketClaims list is immutable",rule="self == oldSelf"
+	BucketClaims []BucketClaimAccess `json:"bucketClaims"`
+
+	// bucketAccessClassName selects the BucketAccessClass for provisioning the access.
+	// +required
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=253
+	// +kubebuilder:validation:XValidation:message="bucketAccessClassName is immutable",rule="self == oldSelf"
+	BucketAccessClassName string `json:"bucketAccessClassName"`
+
+	// protocol is the object storage protocol that the provisioned access must use.
+	// +required
+	// +kubebuilder:validation:XValidation:message="protocol is immutable",rule="self == oldSelf"
+	Protocol ObjectProtocol `json:"protocol"`
+
+	// serviceAccountName is the name of the Kubernetes ServiceAccount that user application Pods
+	// intend to use for access to referenced BucketClaims.
+	// This has different behavior based on the BucketAccessClass's defined AuthenticationType:
+	// - Key: This field is ignored.
+	// - ServiceAccount: This field is required. The driver should configure the system so that Pods
+	//   using the ServiceAccount authenticate to the object storage backend automatically.
 	// +optional
-	Foo *string `json:"foo,omitempty"`
+	// +kubebuilder:validation:MaxLength=253
+	// +kubebuilder:validation:XValidation:message="serviceAccountName is immutable",rule="self == oldSelf"
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
 // BucketAccessStatus defines the observed state of BucketAccess.
+// +kubebuilder:validation:XValidation:message="accountID is immutable once set",rule="!has(oldSelf.accountID) || has(self.accountID)"
+// +kubebuilder:validation:XValidation:message="accessedBuckets is immutable once set",rule="!has(oldSelf.accessedBuckets) || has(self.accessedBuckets)"
+// +kubebuilder:validation:XValidation:message="driverName is immutable once set",rule="!has(oldSelf.driverName) || has(self.driverName)"
+// +kubebuilder:validation:XValidation:message="authenticationType is immutable once set",rule="!has(oldSelf.authenticationType) || has(self.authenticationType)"
+// +kubebuilder:validation:XValidation:message="parameters is immutable once set",rule="!has(oldSelf.parameters) || has(self.parameters)"
 type BucketAccessStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// readyToUse indicates that the BucketAccess is ready for consumption by workloads.
+	ReadyToUse bool `json:"readyToUse"`
 
-	// For Kubernetes API conventions, see:
-	// https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#typical-status-properties
-
-	// conditions represent the current state of the BucketAccess resource.
-	// Each condition has a unique type and reflects the status of a specific aspect of the resource.
-	//
-	// Standard condition types include:
-	// - "Available": the resource is fully functional
-	// - "Progressing": the resource is being created or updated
-	// - "Degraded": the resource failed to reach or maintain its desired state
-	//
-	// The status of each condition is one of True, False, or Unknown.
-	// +listType=map
-	// +listMapKey=type
+	// accountID is the unique identifier for the backend access known to the driver.
+	// This field is populated by the COSI Sidecar once access has been successfully granted.
 	// +optional
-	Conditions []metav1.Condition `json:"conditions,omitempty"`
+	// +kubebuilder:validation:XValidation:message="accountId is immutable once set",rule="oldSelf == '' || self == oldSelf"
+	AccountID string `json:"accountID"`
+
+	// accessedBuckets is a list of Buckets the provisioned access must have permissions for, along
+	// with per-Bucket access options. This field is populated by the COSI Controller based on the
+	// referenced BucketClaims in the spec.
+	// +optional
+	// +listType=map
+	// +listMapKey=bucketName
+	// +kubebuilder:validation:XValidation:message="accessedBuckets is immutable once set",rule="oldSelf.size() == 0 || self == oldSelf"
+	AccessedBuckets []AccessedBucket `json:"accessedBuckets"`
+
+	// driverName holds a copy of the BucketAccessClass driver name from the time of BucketAccess
+	// provisioning. This field is populated by the COSI Controller.
+	// +optional
+	// +kubebuilder:validation:XValidation:message="driverName is immutable once set",rule="oldSelf == '' || self == oldSelf"
+	DriverName string `json:"driverName"`
+
+	// authenticationType holds a copy of the BucketAccessClass authentication type from the time of
+	// BucketAccess provisioning. This field is populated by the COSI Controller.
+	// +optional
+	// +kubebuilder:validation:XValidation:message="authenticationType is immutable once set",rule="oldSelf == '' || self == oldSelf"
+	AuthenticationType BucketAccessAuthenticationType `json:"authenticationType"`
+
+	// parameters holds a copy of the BucketAccessClass parameters from the time of BucketAccess
+	// provisioning. This field is populated by the COSI Controller.
+	// +optional
+	// +kubebuilder:validation:XValidation:message="accessedBuckets is immutable once set",rule="oldSelf.size() == 0 || self == oldSelf"
+	Parameters map[string]string `json:"parameters,omitempty"`
+
+	// error holds the most recent error message, with a timestamp.
+	// This is cleared when provisioning is successful.
+	// +optional
+	Error *TimestampedError `json:"error,omitempty"`
+}
+
+// BucketClaimAccess selects a BucketClaim for access, defines access parameters for the
+// corresponding bucket, and specifies where user-consumable bucket information and access
+// credentials for the accessed bucket will be stored.
+type BucketClaimAccess struct {
+	// bucketClaimName is the name of a BucketClaim the access should have permissions for.
+	// The BucketClaim must be in the same Namespace as the BucketAccess.
+	// +required
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=253
+	BucketClaimName string `json:"bucketClaimName"`
+
+	// accessMode is the Read/Write access mode that the access should have for the bucket.
+	// Possible values: ReadWrite, ReadOnly, WriteOnly.
+	// +required
+	AccessMode BucketAccessMode `json:"accessMode"`
+
+	// accessSecretName is the name of a Kubernetes Secret that COSI should create and populate with
+	// bucket info and access credentials for the bucket.
+	// The Secret is created in the same Namespace as the BucketAccess and is deleted when the
+	// BucketAccess is deleted and deprovisioned.
+	// The Secret name must be unique across all bucketClaimRefs for all BucketAccesses in the same
+	// Namespace.
+	// +required
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=253
+	AccessSecretName string `json:"accessSecretName"`
+}
+
+// AccessedBucket identifies a Bucket and corresponding access parameters.
+type AccessedBucket struct {
+	// bucketName is the name of a Bucket the access should have permissions for.
+	// +required
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=253
+	BucketName string `json:"bucketName"`
+
+	// accessMode is the Read/Write access mode that the access should have for the bucket.
+	// +required
+	AccessMode BucketAccessMode `json:"accessMode"`
 }
 
 // +kubebuilder:object:root=true

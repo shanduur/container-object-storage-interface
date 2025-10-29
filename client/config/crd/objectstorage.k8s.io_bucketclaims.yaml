@@ -45,6 +45,7 @@ spec:
                   bucketClassName selects the BucketClass for provisioning the BucketClaim.
                   This field is used only for BucketClaim dynamic provisioning.
                   If unspecified, existingBucketName must be specified for binding to an existing Bucket.
+                maxLength: 253
                 type: string
                 x-kubernetes-validations:
                 - message: bucketClassName is immutable
@@ -55,6 +56,7 @@ spec:
                   should bind to.
                   This field is used only for BucketClaim static provisioning.
                   If unspecified, bucketClassName must be specified for dynamically provisioning a new bucket.
+                maxLength: 253
                 type: string
                 x-kubernetes-validations:
                 - message: existingBucketName is immutable
@@ -65,6 +67,10 @@ spec:
                   If specified, COSI will verify that each item is advertised as supported by the driver.
                 items:
                   description: ObjectProtocol represents an object protocol type.
+                  enum:
+                  - S3
+                  - Azure
+                  - GCS
                   type: string
                 type: array
                 x-kubernetes-validations:
@@ -72,6 +78,12 @@ spec:
                   rule: self == oldSelf
             type: object
             x-kubernetes-validations:
+            - message: bucketClassName is immutable
+              rule: has(oldSelf.bucketClassName) == has(self.bucketClassName)
+            - message: existingBucketName is immutable
+              rule: has(oldSelf.existingBucketName) == has(self.existingBucketName)
+            - message: protocols list is immutable
+              rule: has(oldSelf.protocols) == has(self.protocols)
             - message: exactly one of the fields in [bucketClassName existingBucketName]
                 must be set
               rule: '[has(self.bucketClassName),has(self.existingBucketName)].filter(x,x==true).size()
@@ -80,12 +92,12 @@ spec:
             description: status defines the observed state of BucketClaim
             properties:
               boundBucketName:
-                description: |-
-                  boundBucketName is the name of the Bucket this BucketClaim is bound to.
-                  Once set, this is immutable.
+                description: boundBucketName is the name of the Bucket this BucketClaim
+                  is bound to.
+                maxLength: 253
                 type: string
                 x-kubernetes-validations:
-                - message: boundBucketName is immutable
+                - message: boundBucketName is immutable once set
                   rule: oldSelf == '' || self == oldSelf
               error:
                 description: |-
@@ -108,6 +120,10 @@ spec:
                   request access to this BucketClaim using any of the protocols reported here.
                 items:
                   description: ObjectProtocol represents an object protocol type.
+                  enum:
+                  - S3
+                  - Azure
+                  - GCS
                   type: string
                 type: array
                 x-kubernetes-list-type: set
@@ -116,9 +132,13 @@ spec:
                   by workloads.
                 type: boolean
             required:
-            - boundBucketName
             - readyToUse
             type: object
+            x-kubernetes-validations:
+            - message: boundBucketName is immutable once set
+              rule: '!has(oldSelf.boundBucketName) || has(self.boundBucketName)'
+            - message: protocols is immutable once set
+              rule: '!has(oldSelf.protocols) || has(self.protocols)'
         required:
         - spec
         type: object

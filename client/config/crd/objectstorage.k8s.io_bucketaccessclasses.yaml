@@ -40,84 +40,67 @@ spec:
           spec:
             description: spec defines the desired state of BucketAccessClass
             properties:
-              foo:
-                description: foo is an example field of BucketAccessClass. Edit bucketaccessclass_types.go
-                  to remove/update
-                type: string
-            type: object
-          status:
-            description: status defines the observed state of BucketAccessClass
-            properties:
-              conditions:
+              authenticationType:
+                allOf:
+                - enum:
+                  - ""
+                  - Key
+                  - ServiceAccount
+                - enum:
+                  - Key
+                  - ServiceAccount
                 description: |-
-                  conditions represent the current state of the BucketAccessClass resource.
-                  Each condition has a unique type and reflects the status of a specific aspect of the resource.
-
-                  Standard condition types include:
-                  - "Available": the resource is fully functional
-                  - "Progressing": the resource is being created or updated
-                  - "Degraded": the resource failed to reach or maintain its desired state
-
-                  The status of each condition is one of True, False, or Unknown.
-                items:
-                  description: Condition contains details for one aspect of the current
-                    state of this API Resource.
-                  properties:
-                    lastTransitionTime:
-                      description: |-
-                        lastTransitionTime is the last time the condition transitioned from one status to another.
-                        This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
-                      format: date-time
-                      type: string
-                    message:
-                      description: |-
-                        message is a human readable message indicating details about the transition.
-                        This may be an empty string.
-                      maxLength: 32768
-                      type: string
-                    observedGeneration:
-                      description: |-
-                        observedGeneration represents the .metadata.generation that the condition was set based upon.
-                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
-                        with respect to the current state of the instance.
-                      format: int64
-                      minimum: 0
-                      type: integer
-                    reason:
-                      description: |-
-                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
-                        Producers of specific condition types may define expected values and meanings for this field,
-                        and whether the values are considered a guaranteed API.
-                        The value should be a CamelCase string.
-                        This field may not be empty.
-                      maxLength: 1024
-                      minLength: 1
-                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
-                      type: string
-                    status:
-                      description: status of the condition, one of True, False, Unknown.
+                  authenticationType specifies which authentication mechanism is used bucket access.
+                  Possible values:
+                   - Key: The driver should generate a protocol-appropriate access key that clients can use to
+                     authenticate to the backend object store.
+                   - ServiceAccount: The driver should configure the system such that Pods using the given
+                     ServiceAccount authenticate to the backend object store automatically.
+                type: string
+              driverName:
+                description: driverName is the name of the driver that fulfills requests
+                  for this BucketAccessClass.
+                minLength: 1
+                type: string
+              featureOptions:
+                description: featureOptions can be used to adjust various COSI access
+                  provisioning behaviors.
+                properties:
+                  disallowMultiBucketAccess:
+                    description: |-
+                      disallowMultiBucketAccess disables the ability for a BucketAccess to reference multiple
+                      BucketClaims when set.
+                    type: boolean
+                  disallowedBucketAccessModes:
+                    description: |-
+                      disallowedBucketAccessModes is a list of disallowed Read/Write access modes. A BucketAccess
+                      using this class will not be allowed to request access to a BucketClaim with any access mode
+                      listed here.
+                    items:
+                      description: BucketAccessMode describes the Read/Write mode
+                        an access should have for a bucket.
                       enum:
-                      - "True"
-                      - "False"
-                      - Unknown
+                      - ReadWrite
+                      - ReadOnly
+                      - WriteOnly
                       type: string
-                    type:
-                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
-                      maxLength: 316
-                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
-                      type: string
-                  required:
-                  - lastTransitionTime
-                  - message
-                  - reason
-                  - status
-                  - type
-                  type: object
-                type: array
-                x-kubernetes-list-map-keys:
-                - type
-                x-kubernetes-list-type: map
+                    type: array
+                    x-kubernetes-list-type: set
+                type: object
+              parameters:
+                additionalProperties:
+                  type: string
+                description: |-
+                  parameters is an opaque map of driver-specific configuration items passed to the driver that
+                  fulfills requests for this BucketAccessClass.
+                type: object
+            required:
+            - authenticationType
+            - driverName
             type: object
+            x-kubernetes-validations:
+            - message: BucketAccessClass spec is immutable
+              rule: self == oldSelf
         required:
         - spec
         type: object

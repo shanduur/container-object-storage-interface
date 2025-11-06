@@ -127,7 +127,115 @@ func (x S3AddressingStyle_Style) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use S3AddressingStyle_Style.Descriptor instead.
 func (S3AddressingStyle_Style) EnumDescriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{6, 0}
+	return file_cosi_proto_rawDescGZIP(), []int{7, 0}
+}
+
+type AuthenticationType_Type int32
+
+const (
+	AuthenticationType_UNKNOWN AuthenticationType_Type = 0
+	// The Provisioner should generate a protocol-appropriate access key that clients can use to
+	// authenticate to the backend object store.
+	AuthenticationType_KEY AuthenticationType_Type = 1
+	// The Provisioner should configure the system such that Pods using the given ServiceAccount
+	// authenticate to the backend object store automatically.
+	AuthenticationType_SERVICE_ACCOUNT AuthenticationType_Type = 2
+)
+
+// Enum value maps for AuthenticationType_Type.
+var (
+	AuthenticationType_Type_name = map[int32]string{
+		0: "UNKNOWN",
+		1: "KEY",
+		2: "SERVICE_ACCOUNT",
+	}
+	AuthenticationType_Type_value = map[string]int32{
+		"UNKNOWN":         0,
+		"KEY":             1,
+		"SERVICE_ACCOUNT": 2,
+	}
+)
+
+func (x AuthenticationType_Type) Enum() *AuthenticationType_Type {
+	p := new(AuthenticationType_Type)
+	*p = x
+	return p
+}
+
+func (x AuthenticationType_Type) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AuthenticationType_Type) Descriptor() protoreflect.EnumDescriptor {
+	return file_cosi_proto_enumTypes[2].Descriptor()
+}
+
+func (AuthenticationType_Type) Type() protoreflect.EnumType {
+	return &file_cosi_proto_enumTypes[2]
+}
+
+func (x AuthenticationType_Type) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AuthenticationType_Type.Descriptor instead.
+func (AuthenticationType_Type) EnumDescriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{12, 0}
+}
+
+type AccessMode_Mode int32
+
+const (
+	AccessMode_UNKNOWN AccessMode_Mode = 0
+	// Read/Write access mode.
+	AccessMode_READ_WRITE AccessMode_Mode = 1
+	// Read-only access mode.
+	AccessMode_READ_ONLY AccessMode_Mode = 2
+	// Write-only access mode.
+	AccessMode_WRITE_ONLY AccessMode_Mode = 3
+)
+
+// Enum value maps for AccessMode_Mode.
+var (
+	AccessMode_Mode_name = map[int32]string{
+		0: "UNKNOWN",
+		1: "READ_WRITE",
+		2: "READ_ONLY",
+		3: "WRITE_ONLY",
+	}
+	AccessMode_Mode_value = map[string]int32{
+		"UNKNOWN":    0,
+		"READ_WRITE": 1,
+		"READ_ONLY":  2,
+		"WRITE_ONLY": 3,
+	}
+)
+
+func (x AccessMode_Mode) Enum() *AccessMode_Mode {
+	p := new(AccessMode_Mode)
+	*p = x
+	return p
+}
+
+func (x AccessMode_Mode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (AccessMode_Mode) Descriptor() protoreflect.EnumDescriptor {
+	return file_cosi_proto_enumTypes[3].Descriptor()
+}
+
+func (AccessMode_Mode) Type() protoreflect.EnumType {
+	return &file_cosi_proto_enumTypes[3]
+}
+
+func (x AccessMode_Mode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use AccessMode_Mode.Descriptor instead.
+func (AccessMode_Mode) EnumDescriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{13, 0}
 }
 
 type DriverGetInfoRequest struct {
@@ -337,6 +445,71 @@ func (x *ObjectProtocolAndBucketInfo) GetGcs() *GcsBucketInfo {
 	return nil
 }
 
+// Credential info for the backend access corresponding to each protocol.
+// If a protocol is not supported, the message MUST be empty/nil.
+type CredentialInfo struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Credential info for S3 protocol access.
+	S3 *S3CredentialInfo `protobuf:"bytes,1,opt,name=s3,proto3" json:"s3,omitempty"`
+	// Credential info for Azure (Blob) protocol access.
+	Azure *AzureCredentialInfo `protobuf:"bytes,2,opt,name=azure,proto3" json:"azure,omitempty"`
+	// Credential info for Google Cloud Storage protocol access.
+	Gcs           *GcsCredentialInfo `protobuf:"bytes,3,opt,name=gcs,proto3" json:"gcs,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CredentialInfo) Reset() {
+	*x = CredentialInfo{}
+	mi := &file_cosi_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CredentialInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CredentialInfo) ProtoMessage() {}
+
+func (x *CredentialInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_cosi_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CredentialInfo.ProtoReflect.Descriptor instead.
+func (*CredentialInfo) Descriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *CredentialInfo) GetS3() *S3CredentialInfo {
+	if x != nil {
+		return x.S3
+	}
+	return nil
+}
+
+func (x *CredentialInfo) GetAzure() *AzureCredentialInfo {
+	if x != nil {
+		return x.Azure
+	}
+	return nil
+}
+
+func (x *CredentialInfo) GetGcs() *GcsCredentialInfo {
+	if x != nil {
+		return x.Gcs
+	}
+	return nil
+}
+
 type S3BucketInfo struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// S3 bucket ID needed for client access.
@@ -355,7 +528,7 @@ type S3BucketInfo struct {
 
 func (x *S3BucketInfo) Reset() {
 	*x = S3BucketInfo{}
-	mi := &file_cosi_proto_msgTypes[4]
+	mi := &file_cosi_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -367,7 +540,7 @@ func (x *S3BucketInfo) String() string {
 func (*S3BucketInfo) ProtoMessage() {}
 
 func (x *S3BucketInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[4]
+	mi := &file_cosi_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -380,7 +553,7 @@ func (x *S3BucketInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use S3BucketInfo.ProtoReflect.Descriptor instead.
 func (*S3BucketInfo) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{4}
+	return file_cosi_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *S3BucketInfo) GetBucketId() string {
@@ -411,7 +584,7 @@ func (x *S3BucketInfo) GetAddressingStyle() *S3AddressingStyle {
 	return nil
 }
 
-type S3AccessInfo struct {
+type S3CredentialInfo struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// S3 access key ID.
 	AccessKeyId string `protobuf:"bytes,1,opt,name=access_key_id,json=accessKeyId,proto3" json:"access_key_id,omitempty"`
@@ -421,21 +594,21 @@ type S3AccessInfo struct {
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *S3AccessInfo) Reset() {
-	*x = S3AccessInfo{}
-	mi := &file_cosi_proto_msgTypes[5]
+func (x *S3CredentialInfo) Reset() {
+	*x = S3CredentialInfo{}
+	mi := &file_cosi_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *S3AccessInfo) String() string {
+func (x *S3CredentialInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*S3AccessInfo) ProtoMessage() {}
+func (*S3CredentialInfo) ProtoMessage() {}
 
-func (x *S3AccessInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[5]
+func (x *S3CredentialInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_cosi_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -446,19 +619,19 @@ func (x *S3AccessInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use S3AccessInfo.ProtoReflect.Descriptor instead.
-func (*S3AccessInfo) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use S3CredentialInfo.ProtoReflect.Descriptor instead.
+func (*S3CredentialInfo) Descriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *S3AccessInfo) GetAccessKeyId() string {
+func (x *S3CredentialInfo) GetAccessKeyId() string {
 	if x != nil {
 		return x.AccessKeyId
 	}
 	return ""
 }
 
-func (x *S3AccessInfo) GetAccessSecretKey() string {
+func (x *S3CredentialInfo) GetAccessSecretKey() string {
 	if x != nil {
 		return x.AccessSecretKey
 	}
@@ -476,7 +649,7 @@ type S3AddressingStyle struct {
 
 func (x *S3AddressingStyle) Reset() {
 	*x = S3AddressingStyle{}
-	mi := &file_cosi_proto_msgTypes[6]
+	mi := &file_cosi_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -488,7 +661,7 @@ func (x *S3AddressingStyle) String() string {
 func (*S3AddressingStyle) ProtoMessage() {}
 
 func (x *S3AddressingStyle) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[6]
+	mi := &file_cosi_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -501,7 +674,7 @@ func (x *S3AddressingStyle) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use S3AddressingStyle.ProtoReflect.Descriptor instead.
 func (*S3AddressingStyle) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{6}
+	return file_cosi_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *S3AddressingStyle) GetStyle() S3AddressingStyle_Style {
@@ -521,7 +694,7 @@ type AzureBucketInfo struct {
 
 func (x *AzureBucketInfo) Reset() {
 	*x = AzureBucketInfo{}
-	mi := &file_cosi_proto_msgTypes[7]
+	mi := &file_cosi_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -533,7 +706,7 @@ func (x *AzureBucketInfo) String() string {
 func (*AzureBucketInfo) ProtoMessage() {}
 
 func (x *AzureBucketInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[7]
+	mi := &file_cosi_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -546,7 +719,7 @@ func (x *AzureBucketInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AzureBucketInfo.ProtoReflect.Descriptor instead.
 func (*AzureBucketInfo) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{7}
+	return file_cosi_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *AzureBucketInfo) GetStorageAccount() string {
@@ -556,7 +729,7 @@ func (x *AzureBucketInfo) GetStorageAccount() string {
 	return ""
 }
 
-type AzureAccessInfo struct {
+type AzureCredentialInfo struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Azure access token.
 	// Note that the Azure spec includes the resource URI as well as token in its definition.
@@ -569,21 +742,21 @@ type AzureAccessInfo struct {
 	sizeCache       protoimpl.SizeCache
 }
 
-func (x *AzureAccessInfo) Reset() {
-	*x = AzureAccessInfo{}
-	mi := &file_cosi_proto_msgTypes[8]
+func (x *AzureCredentialInfo) Reset() {
+	*x = AzureCredentialInfo{}
+	mi := &file_cosi_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *AzureAccessInfo) String() string {
+func (x *AzureCredentialInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*AzureAccessInfo) ProtoMessage() {}
+func (*AzureCredentialInfo) ProtoMessage() {}
 
-func (x *AzureAccessInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[8]
+func (x *AzureCredentialInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_cosi_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -594,19 +767,19 @@ func (x *AzureAccessInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use AzureAccessInfo.ProtoReflect.Descriptor instead.
-func (*AzureAccessInfo) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{8}
+// Deprecated: Use AzureCredentialInfo.ProtoReflect.Descriptor instead.
+func (*AzureCredentialInfo) Descriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *AzureAccessInfo) GetAccessToken() string {
+func (x *AzureCredentialInfo) GetAccessToken() string {
 	if x != nil {
 		return x.AccessToken
 	}
 	return ""
 }
 
-func (x *AzureAccessInfo) GetExpiryTimestamp() string {
+func (x *AzureCredentialInfo) GetExpiryTimestamp() string {
 	if x != nil {
 		return x.ExpiryTimestamp
 	}
@@ -625,7 +798,7 @@ type GcsBucketInfo struct {
 
 func (x *GcsBucketInfo) Reset() {
 	*x = GcsBucketInfo{}
-	mi := &file_cosi_proto_msgTypes[9]
+	mi := &file_cosi_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -637,7 +810,7 @@ func (x *GcsBucketInfo) String() string {
 func (*GcsBucketInfo) ProtoMessage() {}
 
 func (x *GcsBucketInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[9]
+	mi := &file_cosi_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -650,7 +823,7 @@ func (x *GcsBucketInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GcsBucketInfo.ProtoReflect.Descriptor instead.
 func (*GcsBucketInfo) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{9}
+	return file_cosi_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GcsBucketInfo) GetProjectId() string {
@@ -667,7 +840,7 @@ func (x *GcsBucketInfo) GetBucketName() string {
 	return ""
 }
 
-type GcsAccessInfo struct {
+type GcsCredentialInfo struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// HMAC access ID.
 	AccessId string `protobuf:"bytes,1,opt,name=access_id,json=accessId,proto3" json:"access_id,omitempty"`
@@ -681,21 +854,21 @@ type GcsAccessInfo struct {
 	sizeCache      protoimpl.SizeCache
 }
 
-func (x *GcsAccessInfo) Reset() {
-	*x = GcsAccessInfo{}
-	mi := &file_cosi_proto_msgTypes[10]
+func (x *GcsCredentialInfo) Reset() {
+	*x = GcsCredentialInfo{}
+	mi := &file_cosi_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GcsAccessInfo) String() string {
+func (x *GcsCredentialInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GcsAccessInfo) ProtoMessage() {}
+func (*GcsCredentialInfo) ProtoMessage() {}
 
-func (x *GcsAccessInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[10]
+func (x *GcsCredentialInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_cosi_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -706,37 +879,117 @@ func (x *GcsAccessInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GcsAccessInfo.ProtoReflect.Descriptor instead.
-func (*GcsAccessInfo) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{10}
+// Deprecated: Use GcsCredentialInfo.ProtoReflect.Descriptor instead.
+func (*GcsCredentialInfo) Descriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{11}
 }
 
-func (x *GcsAccessInfo) GetAccessId() string {
+func (x *GcsCredentialInfo) GetAccessId() string {
 	if x != nil {
 		return x.AccessId
 	}
 	return ""
 }
 
-func (x *GcsAccessInfo) GetAccessSecret() string {
+func (x *GcsCredentialInfo) GetAccessSecret() string {
 	if x != nil {
 		return x.AccessSecret
 	}
 	return ""
 }
 
-func (x *GcsAccessInfo) GetPrivateKeyName() string {
+func (x *GcsCredentialInfo) GetPrivateKeyName() string {
 	if x != nil {
 		return x.PrivateKeyName
 	}
 	return ""
 }
 
-func (x *GcsAccessInfo) GetServiceAccount() string {
+func (x *GcsCredentialInfo) GetServiceAccount() string {
 	if x != nil {
 		return x.ServiceAccount
 	}
 	return ""
+}
+
+type AuthenticationType struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Type          AuthenticationType_Type `protobuf:"varint,1,opt,name=type,proto3,enum=sigs.k8s.io.cosi.v1alpha2.AuthenticationType_Type" json:"type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AuthenticationType) Reset() {
+	*x = AuthenticationType{}
+	mi := &file_cosi_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AuthenticationType) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AuthenticationType) ProtoMessage() {}
+
+func (x *AuthenticationType) ProtoReflect() protoreflect.Message {
+	mi := &file_cosi_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AuthenticationType.ProtoReflect.Descriptor instead.
+func (*AuthenticationType) Descriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *AuthenticationType) GetType() AuthenticationType_Type {
+	if x != nil {
+		return x.Type
+	}
+	return AuthenticationType_UNKNOWN
+}
+
+type AccessMode struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AccessMode) Reset() {
+	*x = AccessMode{}
+	mi := &file_cosi_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessMode) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessMode) ProtoMessage() {}
+
+func (x *AccessMode) ProtoReflect() protoreflect.Message {
+	mi := &file_cosi_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessMode.ProtoReflect.Descriptor instead.
+func (*AccessMode) Descriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{13}
 }
 
 type DriverCreateBucketRequest struct {
@@ -772,7 +1025,7 @@ type DriverCreateBucketRequest struct {
 
 func (x *DriverCreateBucketRequest) Reset() {
 	*x = DriverCreateBucketRequest{}
-	mi := &file_cosi_proto_msgTypes[11]
+	mi := &file_cosi_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -784,7 +1037,7 @@ func (x *DriverCreateBucketRequest) String() string {
 func (*DriverCreateBucketRequest) ProtoMessage() {}
 
 func (x *DriverCreateBucketRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[11]
+	mi := &file_cosi_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -797,7 +1050,7 @@ func (x *DriverCreateBucketRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverCreateBucketRequest.ProtoReflect.Descriptor instead.
 func (*DriverCreateBucketRequest) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{11}
+	return file_cosi_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *DriverCreateBucketRequest) GetName() string {
@@ -851,7 +1104,7 @@ type DriverCreateBucketResponse struct {
 
 func (x *DriverCreateBucketResponse) Reset() {
 	*x = DriverCreateBucketResponse{}
-	mi := &file_cosi_proto_msgTypes[12]
+	mi := &file_cosi_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -863,7 +1116,7 @@ func (x *DriverCreateBucketResponse) String() string {
 func (*DriverCreateBucketResponse) ProtoMessage() {}
 
 func (x *DriverCreateBucketResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[12]
+	mi := &file_cosi_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -876,7 +1129,7 @@ func (x *DriverCreateBucketResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverCreateBucketResponse.ProtoReflect.Descriptor instead.
 func (*DriverCreateBucketResponse) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{12}
+	return file_cosi_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *DriverCreateBucketResponse) GetBucketId() string {
@@ -894,14 +1147,26 @@ func (x *DriverCreateBucketResponse) GetProtocols() *ObjectProtocolAndBucketInfo
 }
 
 type DriverGetExistingBucketRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED. The unique identifier for the existing backend bucket known to the Provisioner.
+	// Provisioner MUST be able to correlate `bucket_id` to the backend bucket.
+	// It is RECOMMENDED to use the backend storage system's bucket ID.
+	ExistingBucketId string `protobuf:"bytes,1,opt,name=existing_bucket_id,json=existingBucketId,proto3" json:"existing_bucket_id,omitempty"`
+	// OPTIONAL. A list of all object storage protocols the provisioned bucket MUST support.
+	// If none are given, the provisioner MAY provision with a set of default protocol(s) or return
+	// `InvalidArgument` with a message indicating that it requires this input.
+	// If any protocol cannot be supported, the Provisioner MUST return `InvalidArgument`.
+	Protocols []*ObjectProtocol `protobuf:"bytes,2,rep,name=protocols,proto3" json:"protocols,omitempty"`
+	// OPTIONAL. Plugin specific parameters passed in as opaque key-value pairs.
+	// The Plugin is responsible for parsing and validating these parameters.
+	Parameters    map[string]string `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DriverGetExistingBucketRequest) Reset() {
 	*x = DriverGetExistingBucketRequest{}
-	mi := &file_cosi_proto_msgTypes[13]
+	mi := &file_cosi_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -913,7 +1178,7 @@ func (x *DriverGetExistingBucketRequest) String() string {
 func (*DriverGetExistingBucketRequest) ProtoMessage() {}
 
 func (x *DriverGetExistingBucketRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[13]
+	mi := &file_cosi_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -926,18 +1191,61 @@ func (x *DriverGetExistingBucketRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverGetExistingBucketRequest.ProtoReflect.Descriptor instead.
 func (*DriverGetExistingBucketRequest) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{13}
+	return file_cosi_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *DriverGetExistingBucketRequest) GetExistingBucketId() string {
+	if x != nil {
+		return x.ExistingBucketId
+	}
+	return ""
+}
+
+func (x *DriverGetExistingBucketRequest) GetProtocols() []*ObjectProtocol {
+	if x != nil {
+		return x.Protocols
+	}
+	return nil
+}
+
+func (x *DriverGetExistingBucketRequest) GetParameters() map[string]string {
+	if x != nil {
+		return x.Parameters
+	}
+	return nil
 }
 
 type DriverGetExistingBucketResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED. The unique identifier for the backend bucket known to the Provisioner.
+	// This value WILL be used by COSI to make subsequent calls related to the bucket, so the
+	// Provisioner MUST be able to correlate `bucket_id` to the backend bucket.
+	// It is RECOMMENDED to use the backend storage system's bucket ID.
+	BucketId string `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`
+	// REQUIRED: At least one protocol bucket info result MUST be non-nil.
+	//
+	// The primary purpose of this response is to indicate which protocols are supported for
+	// subsequent DriverGrantBucketAccess requests referencing this provisioned bucket. A non-nil
+	// bucket info corresponding to a protocol indicates support.
+	//
+	// The Provisioner MUST indicate support for the protocols in the request. It MAY indicate
+	// support for more protocols than the request. It SHOULD indicate support for all supported
+	// protocols. It MUST NOT indicate support (return a non-nil result) for unsupported protocols.
+	//
+	// The secondary purpose of this response is to report non-credential information about the
+	// bucket. COSI does not expose this information to end-users until a subsequent
+	// DriverGrantBucketAccess is provisioned referencing this bucket. Instead, the info is exposed
+	// to administrators so that they might more easily debug errors in their configuration of COSI.
+	// It is thus RECOMMENDED to return all relevant bucket info for all supported protocols.
+	// However, the Provisioner MAY omit any or all bucket info fields as desired.
+	Protocols     *ObjectProtocolAndBucketInfo `protobuf:"bytes,2,opt,name=protocols,proto3" json:"protocols,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DriverGetExistingBucketResponse) Reset() {
 	*x = DriverGetExistingBucketResponse{}
-	mi := &file_cosi_proto_msgTypes[14]
+	mi := &file_cosi_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -949,7 +1257,7 @@ func (x *DriverGetExistingBucketResponse) String() string {
 func (*DriverGetExistingBucketResponse) ProtoMessage() {}
 
 func (x *DriverGetExistingBucketResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[14]
+	mi := &file_cosi_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -962,18 +1270,36 @@ func (x *DriverGetExistingBucketResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverGetExistingBucketResponse.ProtoReflect.Descriptor instead.
 func (*DriverGetExistingBucketResponse) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{14}
+	return file_cosi_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *DriverGetExistingBucketResponse) GetBucketId() string {
+	if x != nil {
+		return x.BucketId
+	}
+	return ""
+}
+
+func (x *DriverGetExistingBucketResponse) GetProtocols() *ObjectProtocolAndBucketInfo {
+	if x != nil {
+		return x.Protocols
+	}
+	return nil
 }
 
 type DriverDeleteBucketRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED. The unique identifier for the existing backend bucket known to the Provisioner.
+	BucketId string `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`
+	// OPTIONAL. Plugin specific parameters associated with the provisioned bucket.
+	Parameters    map[string]string `protobuf:"bytes,4,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DriverDeleteBucketRequest) Reset() {
 	*x = DriverDeleteBucketRequest{}
-	mi := &file_cosi_proto_msgTypes[15]
+	mi := &file_cosi_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -985,7 +1311,7 @@ func (x *DriverDeleteBucketRequest) String() string {
 func (*DriverDeleteBucketRequest) ProtoMessage() {}
 
 func (x *DriverDeleteBucketRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[15]
+	mi := &file_cosi_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -998,7 +1324,21 @@ func (x *DriverDeleteBucketRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverDeleteBucketRequest.ProtoReflect.Descriptor instead.
 func (*DriverDeleteBucketRequest) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{15}
+	return file_cosi_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *DriverDeleteBucketRequest) GetBucketId() string {
+	if x != nil {
+		return x.BucketId
+	}
+	return ""
+}
+
+func (x *DriverDeleteBucketRequest) GetParameters() map[string]string {
+	if x != nil {
+		return x.Parameters
+	}
+	return nil
 }
 
 type DriverDeleteBucketResponse struct {
@@ -1009,7 +1349,7 @@ type DriverDeleteBucketResponse struct {
 
 func (x *DriverDeleteBucketResponse) Reset() {
 	*x = DriverDeleteBucketResponse{}
-	mi := &file_cosi_proto_msgTypes[16]
+	mi := &file_cosi_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1021,7 +1361,7 @@ func (x *DriverDeleteBucketResponse) String() string {
 func (*DriverDeleteBucketResponse) ProtoMessage() {}
 
 func (x *DriverDeleteBucketResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[16]
+	mi := &file_cosi_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1034,18 +1374,49 @@ func (x *DriverDeleteBucketResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverDeleteBucketResponse.ProtoReflect.Descriptor instead.
 func (*DriverDeleteBucketResponse) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{16}
+	return file_cosi_proto_rawDescGZIP(), []int{19}
 }
 
 type DriverGrantBucketAccessRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED. The suggested name for the backend bucket access.
+	// It serves two purposes:
+	//  1. Suggested name - COSI WILL suggest a name that includes a UID component that is
+	//     statistically likely to be globally unique.
+	//  2. Idempotency - This name is generated by COSI to achieve idempotency. The Plugin SHOULD
+	//     ensure that multiple DriverGrantBucketAccess calls for the same name do not result in more
+	//     than one Bucket being provisioned corresponding to the name.
+	//     The COSI Sidecar WILL call DriverGrantBucketAccess, with the same name, periodically to
+	//     ensure the bucket exists.
+	//     Using or appending random identifiers can lead to multiple unused buckets being created in
+	//     the storage backend in the event of timing-related Driver/Sidecar failures or restarts.
+	//
+	// COSI WILL use DNS subdomain format (https://datatracker.ietf.org/doc/html/rfc1123).
+	// It WILL contain contain no more than 253 characters, contain only lowercase alphanumeric
+	// characters, '-' or '.', start with an alphanumeric character, and end with an alphanumeric
+	// character.
+	AccountName string `protobuf:"bytes,1,opt,name=account_name,json=accountName,proto3" json:"account_name,omitempty"`
+	// REQUIRED. The object storage protocol the provisioned access MUST support.
+	// If the protocol cannot be supported, the Provisioner MUST return `InvalidArgument`.
+	Protocol *ObjectProtocol `protobuf:"bytes,2,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	// REQUIRED. The authentication type that the Provisioner MUST provision for this request.
+	AuthenticationType *AuthenticationType `protobuf:"bytes,3,opt,name=authentication_type,json=authenticationType,proto3" json:"authentication_type,omitempty"`
+	// REQUIRED when `authentication_type` is `SERVICE_ACCOUNT`.
+	// OPTIONAL for all other authentication types.
+	// COSI WILL NOT set this when the requested `authentication_type` is not `SERVICE_ACCOUNT`.
+	ServiceAccountName string `protobuf:"bytes,4,opt,name=service_account_name,json=serviceAccountName,proto3" json:"service_account_name,omitempty"`
+	// OPTIONAL. Plugin specific parameters passed in as opaque key-value pairs.
+	// The Plugin is responsible for parsing and validating these parameters.
+	Parameters map[string]string `protobuf:"bytes,5,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// REQUIRED. Access to at least one bucket MUST be requested.
+	Buckets       []*DriverGrantBucketAccessRequest_AccessedBucket `protobuf:"bytes,6,rep,name=buckets,proto3" json:"buckets,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DriverGrantBucketAccessRequest) Reset() {
 	*x = DriverGrantBucketAccessRequest{}
-	mi := &file_cosi_proto_msgTypes[17]
+	mi := &file_cosi_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1057,7 +1428,7 @@ func (x *DriverGrantBucketAccessRequest) String() string {
 func (*DriverGrantBucketAccessRequest) ProtoMessage() {}
 
 func (x *DriverGrantBucketAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[17]
+	mi := &file_cosi_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1070,18 +1441,69 @@ func (x *DriverGrantBucketAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverGrantBucketAccessRequest.ProtoReflect.Descriptor instead.
 func (*DriverGrantBucketAccessRequest) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{17}
+	return file_cosi_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *DriverGrantBucketAccessRequest) GetAccountName() string {
+	if x != nil {
+		return x.AccountName
+	}
+	return ""
+}
+
+func (x *DriverGrantBucketAccessRequest) GetProtocol() *ObjectProtocol {
+	if x != nil {
+		return x.Protocol
+	}
+	return nil
+}
+
+func (x *DriverGrantBucketAccessRequest) GetAuthenticationType() *AuthenticationType {
+	if x != nil {
+		return x.AuthenticationType
+	}
+	return nil
+}
+
+func (x *DriverGrantBucketAccessRequest) GetServiceAccountName() string {
+	if x != nil {
+		return x.ServiceAccountName
+	}
+	return ""
+}
+
+func (x *DriverGrantBucketAccessRequest) GetParameters() map[string]string {
+	if x != nil {
+		return x.Parameters
+	}
+	return nil
+}
+
+func (x *DriverGrantBucketAccessRequest) GetBuckets() []*DriverGrantBucketAccessRequest_AccessedBucket {
+	if x != nil {
+		return x.Buckets
+	}
+	return nil
 }
 
 type DriverGrantBucketAccessResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED. The unique identifier for the backend access account known to the Provisioner.
+	// This value WILL be used by COSI to make subsequent calls related to the access, so the
+	// Provisioner MUST be able to correlate `account_id` to the backend access.
+	// It is RECOMMENDED to use the backend storage system's bucket ID.
+	AccountId string `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	// REQUIRED. The Provisioner MUST return info for all `buckets` in the request.
+	Buckets []*DriverGrantBucketAccessResponse_BucketInfo `protobuf:"bytes,2,rep,name=buckets,proto3" json:"buckets,omitempty"`
+	// REQUIRED.
+	Credentials   *CredentialInfo `protobuf:"bytes,3,opt,name=credentials,proto3" json:"credentials,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DriverGrantBucketAccessResponse) Reset() {
 	*x = DriverGrantBucketAccessResponse{}
-	mi := &file_cosi_proto_msgTypes[18]
+	mi := &file_cosi_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1093,7 +1515,7 @@ func (x *DriverGrantBucketAccessResponse) String() string {
 func (*DriverGrantBucketAccessResponse) ProtoMessage() {}
 
 func (x *DriverGrantBucketAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[18]
+	mi := &file_cosi_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1106,18 +1528,53 @@ func (x *DriverGrantBucketAccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverGrantBucketAccessResponse.ProtoReflect.Descriptor instead.
 func (*DriverGrantBucketAccessResponse) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{18}
+	return file_cosi_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *DriverGrantBucketAccessResponse) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
+}
+
+func (x *DriverGrantBucketAccessResponse) GetBuckets() []*DriverGrantBucketAccessResponse_BucketInfo {
+	if x != nil {
+		return x.Buckets
+	}
+	return nil
+}
+
+func (x *DriverGrantBucketAccessResponse) GetCredentials() *CredentialInfo {
+	if x != nil {
+		return x.Credentials
+	}
+	return nil
 }
 
 type DriverRevokeBucketAccessRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED. The unique identifier for the backend access account
+	AccountId string `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	// REQUIRED. The object storage protocol associated with the provisioned access.
+	Protocol *ObjectProtocol `protobuf:"bytes,2,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	// REQUIRED. The authentication type associated with the provisioned access.
+	AuthenticationType *AuthenticationType `protobuf:"bytes,3,opt,name=authentication_type,json=authenticationType,proto3" json:"authentication_type,omitempty"`
+	// REQUIRED when `authentication_type` is `SERVICE_ACCOUNT`.
+	// OPTIONAL for all other authentication types.
+	// COSI WILL NOT set this when the requested `authentication_type` is not `SERVICE_ACCOUNT`.
+	ServiceAccountName string `protobuf:"bytes,4,opt,name=service_account_name,json=serviceAccountName,proto3" json:"service_account_name,omitempty"`
+	// OPTIONAL. Plugin specific parameters associated with the provisioned access.
+	Parameters map[string]string `protobuf:"bytes,5,rep,name=parameters,proto3" json:"parameters,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	// REQUIRED. Buckets associated with the provisioned access.
+	Buckets       []*DriverRevokeBucketAccessRequest_AccessedBucket `protobuf:"bytes,6,rep,name=buckets,proto3" json:"buckets,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DriverRevokeBucketAccessRequest) Reset() {
 	*x = DriverRevokeBucketAccessRequest{}
-	mi := &file_cosi_proto_msgTypes[19]
+	mi := &file_cosi_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1129,7 +1586,7 @@ func (x *DriverRevokeBucketAccessRequest) String() string {
 func (*DriverRevokeBucketAccessRequest) ProtoMessage() {}
 
 func (x *DriverRevokeBucketAccessRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[19]
+	mi := &file_cosi_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1142,7 +1599,49 @@ func (x *DriverRevokeBucketAccessRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverRevokeBucketAccessRequest.ProtoReflect.Descriptor instead.
 func (*DriverRevokeBucketAccessRequest) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{19}
+	return file_cosi_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *DriverRevokeBucketAccessRequest) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
+}
+
+func (x *DriverRevokeBucketAccessRequest) GetProtocol() *ObjectProtocol {
+	if x != nil {
+		return x.Protocol
+	}
+	return nil
+}
+
+func (x *DriverRevokeBucketAccessRequest) GetAuthenticationType() *AuthenticationType {
+	if x != nil {
+		return x.AuthenticationType
+	}
+	return nil
+}
+
+func (x *DriverRevokeBucketAccessRequest) GetServiceAccountName() string {
+	if x != nil {
+		return x.ServiceAccountName
+	}
+	return ""
+}
+
+func (x *DriverRevokeBucketAccessRequest) GetParameters() map[string]string {
+	if x != nil {
+		return x.Parameters
+	}
+	return nil
+}
+
+func (x *DriverRevokeBucketAccessRequest) GetBuckets() []*DriverRevokeBucketAccessRequest_AccessedBucket {
+	if x != nil {
+		return x.Buckets
+	}
+	return nil
 }
 
 type DriverRevokeBucketAccessResponse struct {
@@ -1153,7 +1652,7 @@ type DriverRevokeBucketAccessResponse struct {
 
 func (x *DriverRevokeBucketAccessResponse) Reset() {
 	*x = DriverRevokeBucketAccessResponse{}
-	mi := &file_cosi_proto_msgTypes[20]
+	mi := &file_cosi_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1165,7 +1664,7 @@ func (x *DriverRevokeBucketAccessResponse) String() string {
 func (*DriverRevokeBucketAccessResponse) ProtoMessage() {}
 
 func (x *DriverRevokeBucketAccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_cosi_proto_msgTypes[20]
+	mi := &file_cosi_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1178,7 +1677,167 @@ func (x *DriverRevokeBucketAccessResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DriverRevokeBucketAccessResponse.ProtoReflect.Descriptor instead.
 func (*DriverRevokeBucketAccessResponse) Descriptor() ([]byte, []int) {
-	return file_cosi_proto_rawDescGZIP(), []int{20}
+	return file_cosi_proto_rawDescGZIP(), []int{23}
+}
+
+type DriverGrantBucketAccessRequest_AccessedBucket struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED. The unique identifier for the backend bucket known to the Provisioner.
+	BucketId string `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`
+	// REQUIRED. The read/write access mode that the Provisioner SHOULD provision for the bucket
+	// associated with `bucket_id`.
+	AccessMode    *AccessMode `protobuf:"bytes,2,opt,name=access_mode,json=accessMode,proto3" json:"access_mode,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DriverGrantBucketAccessRequest_AccessedBucket) Reset() {
+	*x = DriverGrantBucketAccessRequest_AccessedBucket{}
+	mi := &file_cosi_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DriverGrantBucketAccessRequest_AccessedBucket) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DriverGrantBucketAccessRequest_AccessedBucket) ProtoMessage() {}
+
+func (x *DriverGrantBucketAccessRequest_AccessedBucket) ProtoReflect() protoreflect.Message {
+	mi := &file_cosi_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DriverGrantBucketAccessRequest_AccessedBucket.ProtoReflect.Descriptor instead.
+func (*DriverGrantBucketAccessRequest_AccessedBucket) Descriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{20, 1}
+}
+
+func (x *DriverGrantBucketAccessRequest_AccessedBucket) GetBucketId() string {
+	if x != nil {
+		return x.BucketId
+	}
+	return ""
+}
+
+func (x *DriverGrantBucketAccessRequest_AccessedBucket) GetAccessMode() *AccessMode {
+	if x != nil {
+		return x.AccessMode
+	}
+	return nil
+}
+
+type DriverGrantBucketAccessResponse_BucketInfo struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED. The unique identifier for the backend bucket known to the Provisioner.
+	BucketId string `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`
+	// REQUIRED: EXACTLY one protocol bucket info result MUST be non-nil.
+	// The Provisioner MUST fill in all required bucket info for the requested protocol.
+	// The Provisioner SHOULD fill in as much bucket info as is known given the parameters.
+	// It MUST NOT support (return a non-nil result) non-requested protocols.
+	// COSI WILL expose this information to users, and it WILL be treated as sensitive/secret
+	// information.
+	// COSI WILL not log the information or store it in plaintext.
+	BucketInfo    *ObjectProtocolAndBucketInfo `protobuf:"bytes,2,opt,name=bucket_info,json=bucketInfo,proto3" json:"bucket_info,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DriverGrantBucketAccessResponse_BucketInfo) Reset() {
+	*x = DriverGrantBucketAccessResponse_BucketInfo{}
+	mi := &file_cosi_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DriverGrantBucketAccessResponse_BucketInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DriverGrantBucketAccessResponse_BucketInfo) ProtoMessage() {}
+
+func (x *DriverGrantBucketAccessResponse_BucketInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_cosi_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DriverGrantBucketAccessResponse_BucketInfo.ProtoReflect.Descriptor instead.
+func (*DriverGrantBucketAccessResponse_BucketInfo) Descriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{21, 0}
+}
+
+func (x *DriverGrantBucketAccessResponse_BucketInfo) GetBucketId() string {
+	if x != nil {
+		return x.BucketId
+	}
+	return ""
+}
+
+func (x *DriverGrantBucketAccessResponse_BucketInfo) GetBucketInfo() *ObjectProtocolAndBucketInfo {
+	if x != nil {
+		return x.BucketInfo
+	}
+	return nil
+}
+
+type DriverRevokeBucketAccessRequest_AccessedBucket struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// REQUIRED. The unique identifier for the backend bucket known to the Provisioner.
+	BucketId      string `protobuf:"bytes,1,opt,name=bucket_id,json=bucketId,proto3" json:"bucket_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DriverRevokeBucketAccessRequest_AccessedBucket) Reset() {
+	*x = DriverRevokeBucketAccessRequest_AccessedBucket{}
+	mi := &file_cosi_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DriverRevokeBucketAccessRequest_AccessedBucket) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DriverRevokeBucketAccessRequest_AccessedBucket) ProtoMessage() {}
+
+func (x *DriverRevokeBucketAccessRequest_AccessedBucket) ProtoReflect() protoreflect.Message {
+	mi := &file_cosi_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DriverRevokeBucketAccessRequest_AccessedBucket.ProtoReflect.Descriptor instead.
+func (*DriverRevokeBucketAccessRequest_AccessedBucket) Descriptor() ([]byte, []int) {
+	return file_cosi_proto_rawDescGZIP(), []int{22, 1}
+}
+
+func (x *DriverRevokeBucketAccessRequest_AccessedBucket) GetBucketId() string {
+	if x != nil {
+		return x.BucketId
+	}
+	return ""
 }
 
 var file_cosi_proto_extTypes = []protoimpl.ExtensionInfo{
@@ -1325,13 +1984,17 @@ const file_cosi_proto_rawDesc = "" +
 	"\x1bObjectProtocolAndBucketInfo\x127\n" +
 	"\x02s3\x18\x01 \x01(\v2'.sigs.k8s.io.cosi.v1alpha2.S3BucketInfoR\x02s3\x12@\n" +
 	"\x05azure\x18\x02 \x01(\v2*.sigs.k8s.io.cosi.v1alpha2.AzureBucketInfoR\x05azure\x12:\n" +
-	"\x03gcs\x18\x03 \x01(\v2(.sigs.k8s.io.cosi.v1alpha2.GcsBucketInfoR\x03gcs\"\xb8\x01\n" +
+	"\x03gcs\x18\x03 \x01(\v2(.sigs.k8s.io.cosi.v1alpha2.GcsBucketInfoR\x03gcs\"\xd3\x01\n" +
+	"\x0eCredentialInfo\x12;\n" +
+	"\x02s3\x18\x01 \x01(\v2+.sigs.k8s.io.cosi.v1alpha2.S3CredentialInfoR\x02s3\x12D\n" +
+	"\x05azure\x18\x02 \x01(\v2..sigs.k8s.io.cosi.v1alpha2.AzureCredentialInfoR\x05azure\x12>\n" +
+	"\x03gcs\x18\x03 \x01(\v2,.sigs.k8s.io.cosi.v1alpha2.GcsCredentialInfoR\x03gcs\"\xb8\x01\n" +
 	"\fS3BucketInfo\x12\x1b\n" +
 	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12\x1a\n" +
 	"\bendpoint\x18\x02 \x01(\tR\bendpoint\x12\x16\n" +
 	"\x06region\x18\x03 \x01(\tR\x06region\x12W\n" +
-	"\x10addressing_style\x18\x04 \x01(\v2,.sigs.k8s.io.cosi.v1alpha2.S3AddressingStyleR\x0faddressingStyle\"^\n" +
-	"\fS3AccessInfo\x12\"\n" +
+	"\x10addressing_style\x18\x04 \x01(\v2,.sigs.k8s.io.cosi.v1alpha2.S3AddressingStyleR\x0faddressingStyle\"b\n" +
+	"\x10S3CredentialInfo\x12\"\n" +
 	"\raccess_key_id\x18\x01 \x01(\tR\vaccessKeyId\x12*\n" +
 	"\x11access_secret_key\x18\x02 \x01(\tR\x0faccessSecretKey\"\x8a\x01\n" +
 	"\x11S3AddressingStyle\x12H\n" +
@@ -1341,20 +2004,35 @@ const file_cosi_proto_rawDesc = "" +
 	"\x04PATH\x10\x01\x12\v\n" +
 	"\aVIRTUAL\x10\x02\":\n" +
 	"\x0fAzureBucketInfo\x12'\n" +
-	"\x0fstorage_account\x18\x01 \x01(\tR\x0estorageAccount\"_\n" +
-	"\x0fAzureAccessInfo\x12!\n" +
+	"\x0fstorage_account\x18\x01 \x01(\tR\x0estorageAccount\"c\n" +
+	"\x13AzureCredentialInfo\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12)\n" +
 	"\x10expiry_timestamp\x18\x02 \x01(\tR\x0fexpiryTimestamp\"O\n" +
 	"\rGcsBucketInfo\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x01 \x01(\tR\tprojectId\x12\x1f\n" +
 	"\vbucket_name\x18\x02 \x01(\tR\n" +
-	"bucketName\"\xa4\x01\n" +
-	"\rGcsAccessInfo\x12\x1b\n" +
+	"bucketName\"\xa8\x01\n" +
+	"\x11GcsCredentialInfo\x12\x1b\n" +
 	"\taccess_id\x18\x01 \x01(\tR\baccessId\x12#\n" +
 	"\raccess_secret\x18\x02 \x01(\tR\faccessSecret\x12(\n" +
 	"\x10private_key_name\x18\x03 \x01(\tR\x0eprivateKeyName\x12'\n" +
-	"\x0fservice_account\x18\x04 \x01(\tR\x0eserviceAccount\"\x9d\x02\n" +
+	"\x0fservice_account\x18\x04 \x01(\tR\x0eserviceAccount\"\x8f\x01\n" +
+	"\x12AuthenticationType\x12F\n" +
+	"\x04type\x18\x01 \x01(\x0e22.sigs.k8s.io.cosi.v1alpha2.AuthenticationType.TypeR\x04type\"1\n" +
+	"\x04Type\x12\v\n" +
+	"\aUNKNOWN\x10\x00\x12\a\n" +
+	"\x03KEY\x10\x01\x12\x13\n" +
+	"\x0fSERVICE_ACCOUNT\x10\x02\"P\n" +
+	"\n" +
+	"AccessMode\"B\n" +
+	"\x04Mode\x12\v\n" +
+	"\aUNKNOWN\x10\x00\x12\x0e\n" +
+	"\n" +
+	"READ_WRITE\x10\x01\x12\r\n" +
+	"\tREAD_ONLY\x10\x02\x12\x0e\n" +
+	"\n" +
+	"WRITE_ONLY\x10\x03\"\x9d\x02\n" +
 	"\x19DriverCreateBucketRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12G\n" +
 	"\tprotocols\x18\x02 \x03(\v2).sigs.k8s.io.cosi.v1alpha2.ObjectProtocolR\tprotocols\x12d\n" +
@@ -1366,14 +2044,69 @@ const file_cosi_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x8f\x01\n" +
 	"\x1aDriverCreateBucketResponse\x12\x1b\n" +
 	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12T\n" +
-	"\tprotocols\x18\x02 \x01(\v26.sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfoR\tprotocols\" \n" +
-	"\x1eDriverGetExistingBucketRequest\"!\n" +
-	"\x1fDriverGetExistingBucketResponse\"\x1b\n" +
-	"\x19DriverDeleteBucketRequest\"\x1c\n" +
-	"\x1aDriverDeleteBucketResponse\" \n" +
-	"\x1eDriverGrantBucketAccessRequest\"!\n" +
-	"\x1fDriverGrantBucketAccessResponse\"!\n" +
-	"\x1fDriverRevokeBucketAccessRequest\"\"\n" +
+	"\tprotocols\x18\x02 \x01(\v26.sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfoR\tprotocols\"\xc1\x02\n" +
+	"\x1eDriverGetExistingBucketRequest\x12,\n" +
+	"\x12existing_bucket_id\x18\x01 \x01(\tR\x10existingBucketId\x12G\n" +
+	"\tprotocols\x18\x02 \x03(\v2).sigs.k8s.io.cosi.v1alpha2.ObjectProtocolR\tprotocols\x12i\n" +
+	"\n" +
+	"parameters\x18\x04 \x03(\v2I.sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketRequest.ParametersEntryR\n" +
+	"parameters\x1a=\n" +
+	"\x0fParametersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x94\x01\n" +
+	"\x1fDriverGetExistingBucketResponse\x12\x1b\n" +
+	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12T\n" +
+	"\tprotocols\x18\x02 \x01(\v26.sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfoR\tprotocols\"\xdd\x01\n" +
+	"\x19DriverDeleteBucketRequest\x12\x1b\n" +
+	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12d\n" +
+	"\n" +
+	"parameters\x18\x04 \x03(\v2D.sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketRequest.ParametersEntryR\n" +
+	"parameters\x1a=\n" +
+	"\x0fParametersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x1c\n" +
+	"\x1aDriverDeleteBucketResponse\"\xa1\x05\n" +
+	"\x1eDriverGrantBucketAccessRequest\x12!\n" +
+	"\faccount_name\x18\x01 \x01(\tR\vaccountName\x12E\n" +
+	"\bprotocol\x18\x02 \x01(\v2).sigs.k8s.io.cosi.v1alpha2.ObjectProtocolR\bprotocol\x12^\n" +
+	"\x13authentication_type\x18\x03 \x01(\v2-.sigs.k8s.io.cosi.v1alpha2.AuthenticationTypeR\x12authenticationType\x120\n" +
+	"\x14service_account_name\x18\x04 \x01(\tR\x12serviceAccountName\x12i\n" +
+	"\n" +
+	"parameters\x18\x05 \x03(\v2I.sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.ParametersEntryR\n" +
+	"parameters\x12b\n" +
+	"\abuckets\x18\x06 \x03(\v2H.sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.AccessedBucketR\abuckets\x1a=\n" +
+	"\x0fParametersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1au\n" +
+	"\x0eAccessedBucket\x12\x1b\n" +
+	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12F\n" +
+	"\vaccess_mode\x18\x02 \x01(\v2%.sigs.k8s.io.cosi.v1alpha2.AccessModeR\n" +
+	"accessMode\"\xf3\x02\n" +
+	"\x1fDriverGrantBucketAccessResponse\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\x01 \x01(\tR\taccountId\x12_\n" +
+	"\abuckets\x18\x02 \x03(\v2E.sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse.BucketInfoR\abuckets\x12K\n" +
+	"\vcredentials\x18\x03 \x01(\v2).sigs.k8s.io.cosi.v1alpha2.CredentialInfoR\vcredentials\x1a\x82\x01\n" +
+	"\n" +
+	"BucketInfo\x12\x1b\n" +
+	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\x12W\n" +
+	"\vbucket_info\x18\x02 \x01(\v26.sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfoR\n" +
+	"bucketInfo\"\xd8\x04\n" +
+	"\x1fDriverRevokeBucketAccessRequest\x12\x1d\n" +
+	"\n" +
+	"account_id\x18\x01 \x01(\tR\taccountId\x12E\n" +
+	"\bprotocol\x18\x02 \x01(\v2).sigs.k8s.io.cosi.v1alpha2.ObjectProtocolR\bprotocol\x12^\n" +
+	"\x13authentication_type\x18\x03 \x01(\v2-.sigs.k8s.io.cosi.v1alpha2.AuthenticationTypeR\x12authenticationType\x120\n" +
+	"\x14service_account_name\x18\x04 \x01(\tR\x12serviceAccountName\x12j\n" +
+	"\n" +
+	"parameters\x18\x05 \x03(\v2J.sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.ParametersEntryR\n" +
+	"parameters\x12c\n" +
+	"\abuckets\x18\x06 \x03(\v2I.sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.AccessedBucketR\abuckets\x1a=\n" +
+	"\x0fParametersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a-\n" +
+	"\x0eAccessedBucket\x12\x1b\n" +
+	"\tbucket_id\x18\x01 \x01(\tR\bbucketId\"\"\n" +
 	" DriverRevokeBucketAccessResponse2\x80\x01\n" +
 	"\bIdentity\x12t\n" +
 	"\rDriverGetInfo\x12/.sigs.k8s.io.cosi.v1alpha2.DriverGetInfoRequest\x1a0.sigs.k8s.io.cosi.v1alpha2.DriverGetInfoResponse\"\x002\xd7\x05\n" +
@@ -1406,75 +2139,107 @@ func file_cosi_proto_rawDescGZIP() []byte {
 	return file_cosi_proto_rawDescData
 }
 
-var file_cosi_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_cosi_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_cosi_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
+var file_cosi_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_cosi_proto_goTypes = []any{
-	(ObjectProtocol_Type)(0),                 // 0: sigs.k8s.io.cosi.v1alpha2.ObjectProtocol.Type
-	(S3AddressingStyle_Style)(0),             // 1: sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle.Style
-	(*DriverGetInfoRequest)(nil),             // 2: sigs.k8s.io.cosi.v1alpha2.DriverGetInfoRequest
-	(*DriverGetInfoResponse)(nil),            // 3: sigs.k8s.io.cosi.v1alpha2.DriverGetInfoResponse
-	(*ObjectProtocol)(nil),                   // 4: sigs.k8s.io.cosi.v1alpha2.ObjectProtocol
-	(*ObjectProtocolAndBucketInfo)(nil),      // 5: sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo
-	(*S3BucketInfo)(nil),                     // 6: sigs.k8s.io.cosi.v1alpha2.S3BucketInfo
-	(*S3AccessInfo)(nil),                     // 7: sigs.k8s.io.cosi.v1alpha2.S3AccessInfo
-	(*S3AddressingStyle)(nil),                // 8: sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle
-	(*AzureBucketInfo)(nil),                  // 9: sigs.k8s.io.cosi.v1alpha2.AzureBucketInfo
-	(*AzureAccessInfo)(nil),                  // 10: sigs.k8s.io.cosi.v1alpha2.AzureAccessInfo
-	(*GcsBucketInfo)(nil),                    // 11: sigs.k8s.io.cosi.v1alpha2.GcsBucketInfo
-	(*GcsAccessInfo)(nil),                    // 12: sigs.k8s.io.cosi.v1alpha2.GcsAccessInfo
-	(*DriverCreateBucketRequest)(nil),        // 13: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest
-	(*DriverCreateBucketResponse)(nil),       // 14: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketResponse
-	(*DriverGetExistingBucketRequest)(nil),   // 15: sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketRequest
-	(*DriverGetExistingBucketResponse)(nil),  // 16: sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketResponse
-	(*DriverDeleteBucketRequest)(nil),        // 17: sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketRequest
-	(*DriverDeleteBucketResponse)(nil),       // 18: sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketResponse
-	(*DriverGrantBucketAccessRequest)(nil),   // 19: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest
-	(*DriverGrantBucketAccessResponse)(nil),  // 20: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse
-	(*DriverRevokeBucketAccessRequest)(nil),  // 21: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest
-	(*DriverRevokeBucketAccessResponse)(nil), // 22: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessResponse
-	nil,                                      // 23: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest.ParametersEntry
-	(*descriptorpb.EnumOptions)(nil),         // 24: google.protobuf.EnumOptions
-	(*descriptorpb.EnumValueOptions)(nil),    // 25: google.protobuf.EnumValueOptions
-	(*descriptorpb.FieldOptions)(nil),        // 26: google.protobuf.FieldOptions
-	(*descriptorpb.MessageOptions)(nil),      // 27: google.protobuf.MessageOptions
-	(*descriptorpb.MethodOptions)(nil),       // 28: google.protobuf.MethodOptions
-	(*descriptorpb.ServiceOptions)(nil),      // 29: google.protobuf.ServiceOptions
+	(ObjectProtocol_Type)(0),                              // 0: sigs.k8s.io.cosi.v1alpha2.ObjectProtocol.Type
+	(S3AddressingStyle_Style)(0),                          // 1: sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle.Style
+	(AuthenticationType_Type)(0),                          // 2: sigs.k8s.io.cosi.v1alpha2.AuthenticationType.Type
+	(AccessMode_Mode)(0),                                  // 3: sigs.k8s.io.cosi.v1alpha2.AccessMode.Mode
+	(*DriverGetInfoRequest)(nil),                          // 4: sigs.k8s.io.cosi.v1alpha2.DriverGetInfoRequest
+	(*DriverGetInfoResponse)(nil),                         // 5: sigs.k8s.io.cosi.v1alpha2.DriverGetInfoResponse
+	(*ObjectProtocol)(nil),                                // 6: sigs.k8s.io.cosi.v1alpha2.ObjectProtocol
+	(*ObjectProtocolAndBucketInfo)(nil),                   // 7: sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo
+	(*CredentialInfo)(nil),                                // 8: sigs.k8s.io.cosi.v1alpha2.CredentialInfo
+	(*S3BucketInfo)(nil),                                  // 9: sigs.k8s.io.cosi.v1alpha2.S3BucketInfo
+	(*S3CredentialInfo)(nil),                              // 10: sigs.k8s.io.cosi.v1alpha2.S3CredentialInfo
+	(*S3AddressingStyle)(nil),                             // 11: sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle
+	(*AzureBucketInfo)(nil),                               // 12: sigs.k8s.io.cosi.v1alpha2.AzureBucketInfo
+	(*AzureCredentialInfo)(nil),                           // 13: sigs.k8s.io.cosi.v1alpha2.AzureCredentialInfo
+	(*GcsBucketInfo)(nil),                                 // 14: sigs.k8s.io.cosi.v1alpha2.GcsBucketInfo
+	(*GcsCredentialInfo)(nil),                             // 15: sigs.k8s.io.cosi.v1alpha2.GcsCredentialInfo
+	(*AuthenticationType)(nil),                            // 16: sigs.k8s.io.cosi.v1alpha2.AuthenticationType
+	(*AccessMode)(nil),                                    // 17: sigs.k8s.io.cosi.v1alpha2.AccessMode
+	(*DriverCreateBucketRequest)(nil),                     // 18: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest
+	(*DriverCreateBucketResponse)(nil),                    // 19: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketResponse
+	(*DriverGetExistingBucketRequest)(nil),                // 20: sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketRequest
+	(*DriverGetExistingBucketResponse)(nil),               // 21: sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketResponse
+	(*DriverDeleteBucketRequest)(nil),                     // 22: sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketRequest
+	(*DriverDeleteBucketResponse)(nil),                    // 23: sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketResponse
+	(*DriverGrantBucketAccessRequest)(nil),                // 24: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest
+	(*DriverGrantBucketAccessResponse)(nil),               // 25: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse
+	(*DriverRevokeBucketAccessRequest)(nil),               // 26: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest
+	(*DriverRevokeBucketAccessResponse)(nil),              // 27: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessResponse
+	nil,                                                   // 28: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest.ParametersEntry
+	nil,                                                   // 29: sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketRequest.ParametersEntry
+	nil,                                                   // 30: sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketRequest.ParametersEntry
+	nil,                                                   // 31: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.ParametersEntry
+	(*DriverGrantBucketAccessRequest_AccessedBucket)(nil), // 32: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.AccessedBucket
+	(*DriverGrantBucketAccessResponse_BucketInfo)(nil),    // 33: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse.BucketInfo
+	nil, // 34: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.ParametersEntry
+	(*DriverRevokeBucketAccessRequest_AccessedBucket)(nil), // 35: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.AccessedBucket
+	(*descriptorpb.EnumOptions)(nil),                       // 36: google.protobuf.EnumOptions
+	(*descriptorpb.EnumValueOptions)(nil),                  // 37: google.protobuf.EnumValueOptions
+	(*descriptorpb.FieldOptions)(nil),                      // 38: google.protobuf.FieldOptions
+	(*descriptorpb.MessageOptions)(nil),                    // 39: google.protobuf.MessageOptions
+	(*descriptorpb.MethodOptions)(nil),                     // 40: google.protobuf.MethodOptions
+	(*descriptorpb.ServiceOptions)(nil),                    // 41: google.protobuf.ServiceOptions
 }
 var file_cosi_proto_depIdxs = []int32{
-	4,  // 0: sigs.k8s.io.cosi.v1alpha2.DriverGetInfoResponse.supported_protocols:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocol
+	6,  // 0: sigs.k8s.io.cosi.v1alpha2.DriverGetInfoResponse.supported_protocols:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocol
 	0,  // 1: sigs.k8s.io.cosi.v1alpha2.ObjectProtocol.type:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocol.Type
-	6,  // 2: sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo.s3:type_name -> sigs.k8s.io.cosi.v1alpha2.S3BucketInfo
-	9,  // 3: sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo.azure:type_name -> sigs.k8s.io.cosi.v1alpha2.AzureBucketInfo
-	11, // 4: sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo.gcs:type_name -> sigs.k8s.io.cosi.v1alpha2.GcsBucketInfo
-	8,  // 5: sigs.k8s.io.cosi.v1alpha2.S3BucketInfo.addressing_style:type_name -> sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle
-	1,  // 6: sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle.style:type_name -> sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle.Style
-	4,  // 7: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest.protocols:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocol
-	23, // 8: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest.parameters:type_name -> sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest.ParametersEntry
-	5,  // 9: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketResponse.protocols:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo
-	24, // 10: sigs.k8s.io.cosi.v1alpha2.alpha_enum:extendee -> google.protobuf.EnumOptions
-	25, // 11: sigs.k8s.io.cosi.v1alpha2.alpha_enum_value:extendee -> google.protobuf.EnumValueOptions
-	26, // 12: sigs.k8s.io.cosi.v1alpha2.cosi_secret:extendee -> google.protobuf.FieldOptions
-	26, // 13: sigs.k8s.io.cosi.v1alpha2.alpha_field:extendee -> google.protobuf.FieldOptions
-	27, // 14: sigs.k8s.io.cosi.v1alpha2.alpha_message:extendee -> google.protobuf.MessageOptions
-	28, // 15: sigs.k8s.io.cosi.v1alpha2.alpha_method:extendee -> google.protobuf.MethodOptions
-	29, // 16: sigs.k8s.io.cosi.v1alpha2.alpha_service:extendee -> google.protobuf.ServiceOptions
-	2,  // 17: sigs.k8s.io.cosi.v1alpha2.Identity.DriverGetInfo:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverGetInfoRequest
-	13, // 18: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverCreateBucket:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest
-	15, // 19: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverGetExistingBucket:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketRequest
-	17, // 20: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverDeleteBucket:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketRequest
-	19, // 21: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverGrantBucketAccess:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest
-	21, // 22: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverRevokeBucketAccess:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest
-	3,  // 23: sigs.k8s.io.cosi.v1alpha2.Identity.DriverGetInfo:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverGetInfoResponse
-	14, // 24: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverCreateBucket:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketResponse
-	16, // 25: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverGetExistingBucket:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketResponse
-	18, // 26: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverDeleteBucket:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketResponse
-	20, // 27: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverGrantBucketAccess:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse
-	22, // 28: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverRevokeBucketAccess:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessResponse
-	23, // [23:29] is the sub-list for method output_type
-	17, // [17:23] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	10, // [10:17] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	9,  // 2: sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo.s3:type_name -> sigs.k8s.io.cosi.v1alpha2.S3BucketInfo
+	12, // 3: sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo.azure:type_name -> sigs.k8s.io.cosi.v1alpha2.AzureBucketInfo
+	14, // 4: sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo.gcs:type_name -> sigs.k8s.io.cosi.v1alpha2.GcsBucketInfo
+	10, // 5: sigs.k8s.io.cosi.v1alpha2.CredentialInfo.s3:type_name -> sigs.k8s.io.cosi.v1alpha2.S3CredentialInfo
+	13, // 6: sigs.k8s.io.cosi.v1alpha2.CredentialInfo.azure:type_name -> sigs.k8s.io.cosi.v1alpha2.AzureCredentialInfo
+	15, // 7: sigs.k8s.io.cosi.v1alpha2.CredentialInfo.gcs:type_name -> sigs.k8s.io.cosi.v1alpha2.GcsCredentialInfo
+	11, // 8: sigs.k8s.io.cosi.v1alpha2.S3BucketInfo.addressing_style:type_name -> sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle
+	1,  // 9: sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle.style:type_name -> sigs.k8s.io.cosi.v1alpha2.S3AddressingStyle.Style
+	2,  // 10: sigs.k8s.io.cosi.v1alpha2.AuthenticationType.type:type_name -> sigs.k8s.io.cosi.v1alpha2.AuthenticationType.Type
+	6,  // 11: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest.protocols:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocol
+	28, // 12: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest.parameters:type_name -> sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest.ParametersEntry
+	7,  // 13: sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketResponse.protocols:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo
+	6,  // 14: sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketRequest.protocols:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocol
+	29, // 15: sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketRequest.parameters:type_name -> sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketRequest.ParametersEntry
+	7,  // 16: sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketResponse.protocols:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo
+	30, // 17: sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketRequest.parameters:type_name -> sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketRequest.ParametersEntry
+	6,  // 18: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.protocol:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocol
+	16, // 19: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.authentication_type:type_name -> sigs.k8s.io.cosi.v1alpha2.AuthenticationType
+	31, // 20: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.parameters:type_name -> sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.ParametersEntry
+	32, // 21: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.buckets:type_name -> sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.AccessedBucket
+	33, // 22: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse.buckets:type_name -> sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse.BucketInfo
+	8,  // 23: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse.credentials:type_name -> sigs.k8s.io.cosi.v1alpha2.CredentialInfo
+	6,  // 24: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.protocol:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocol
+	16, // 25: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.authentication_type:type_name -> sigs.k8s.io.cosi.v1alpha2.AuthenticationType
+	34, // 26: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.parameters:type_name -> sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.ParametersEntry
+	35, // 27: sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.buckets:type_name -> sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest.AccessedBucket
+	17, // 28: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest.AccessedBucket.access_mode:type_name -> sigs.k8s.io.cosi.v1alpha2.AccessMode
+	7,  // 29: sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse.BucketInfo.bucket_info:type_name -> sigs.k8s.io.cosi.v1alpha2.ObjectProtocolAndBucketInfo
+	36, // 30: sigs.k8s.io.cosi.v1alpha2.alpha_enum:extendee -> google.protobuf.EnumOptions
+	37, // 31: sigs.k8s.io.cosi.v1alpha2.alpha_enum_value:extendee -> google.protobuf.EnumValueOptions
+	38, // 32: sigs.k8s.io.cosi.v1alpha2.cosi_secret:extendee -> google.protobuf.FieldOptions
+	38, // 33: sigs.k8s.io.cosi.v1alpha2.alpha_field:extendee -> google.protobuf.FieldOptions
+	39, // 34: sigs.k8s.io.cosi.v1alpha2.alpha_message:extendee -> google.protobuf.MessageOptions
+	40, // 35: sigs.k8s.io.cosi.v1alpha2.alpha_method:extendee -> google.protobuf.MethodOptions
+	41, // 36: sigs.k8s.io.cosi.v1alpha2.alpha_service:extendee -> google.protobuf.ServiceOptions
+	4,  // 37: sigs.k8s.io.cosi.v1alpha2.Identity.DriverGetInfo:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverGetInfoRequest
+	18, // 38: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverCreateBucket:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketRequest
+	20, // 39: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverGetExistingBucket:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketRequest
+	22, // 40: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverDeleteBucket:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketRequest
+	24, // 41: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverGrantBucketAccess:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessRequest
+	26, // 42: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverRevokeBucketAccess:input_type -> sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessRequest
+	5,  // 43: sigs.k8s.io.cosi.v1alpha2.Identity.DriverGetInfo:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverGetInfoResponse
+	19, // 44: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverCreateBucket:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverCreateBucketResponse
+	21, // 45: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverGetExistingBucket:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverGetExistingBucketResponse
+	23, // 46: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverDeleteBucket:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverDeleteBucketResponse
+	25, // 47: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverGrantBucketAccess:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverGrantBucketAccessResponse
+	27, // 48: sigs.k8s.io.cosi.v1alpha2.Provisioner.DriverRevokeBucketAccess:output_type -> sigs.k8s.io.cosi.v1alpha2.DriverRevokeBucketAccessResponse
+	43, // [43:49] is the sub-list for method output_type
+	37, // [37:43] is the sub-list for method input_type
+	37, // [37:37] is the sub-list for extension type_name
+	30, // [30:37] is the sub-list for extension extendee
+	0,  // [0:30] is the sub-list for field type_name
 }
 
 func init() { file_cosi_proto_init() }
@@ -1487,8 +2252,8 @@ func file_cosi_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_cosi_proto_rawDesc), len(file_cosi_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   22,
+			NumEnums:      4,
+			NumMessages:   32,
 			NumExtensions: 7,
 			NumServices:   2,
 		},

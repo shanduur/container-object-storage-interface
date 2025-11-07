@@ -146,6 +146,7 @@ type ProvisionerClient interface {
 	// Important return codes:
 	// - MUST return OK if a principal with matching identity and parameters already exists.
 	// - MUST return ALREADY_EXISTS if a principal with matching identity exists but with incompatible parameters.
+	// - MUST return OUT_OF_RANGE - if (and only if) the driver/backend does not support multi-bucket access.
 	DriverGrantBucketAccess(ctx context.Context, in *DriverGrantBucketAccessRequest, opts ...grpc.CallOption) (*DriverGrantBucketAccessResponse, error)
 	// Revokes access to given bucket(s) from a principal.
 	//
@@ -233,6 +234,7 @@ type ProvisionerServer interface {
 	// Important return codes:
 	// - MUST return OK if a principal with matching identity and parameters already exists.
 	// - MUST return ALREADY_EXISTS if a principal with matching identity exists but with incompatible parameters.
+	// - MUST return OUT_OF_RANGE - if (and only if) the driver/backend does not support multi-bucket access.
 	DriverGrantBucketAccess(context.Context, *DriverGrantBucketAccessRequest) (*DriverGrantBucketAccessResponse, error)
 	// Revokes access to given bucket(s) from a principal.
 	//

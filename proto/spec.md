@@ -131,6 +131,7 @@ service Provisioner {
     // Important return codes:
     // - MUST return OK if a principal with matching identity and parameters already exists.
     // - MUST return ALREADY_EXISTS if a principal with matching identity exists but with incompatible parameters.
+    // - MUST return OUT_OF_RANGE - if (and only if) the driver/backend does not support multi-bucket access.
     rpc DriverGrantBucketAccess (DriverGrantBucketAccessRequest) returns (DriverGrantBucketAccessResponse);
 
     // Revokes access to given bucket(s) from a principal.
@@ -283,6 +284,19 @@ message ObjectProtocolAndBucketInfo {
     // Protocol support and bucket info for Google Cloud Storage protocol access.
     GcsBucketInfo gcs = 3;
 }
+
+// Credential info for the backend access corresponding to each protocol.
+// If a protocol is not supported, the message MUST be empty/nil.
+message CredentialInfo {
+    // Credential info for S3 protocol access.
+    S3CredentialInfo s3 = 1;
+
+    // Credential info for Azure (Blob) protocol access.
+    AzureCredentialInfo azure = 2;
+
+    // Credential info for Google Cloud Storage protocol access.
+    GcsCredentialInfo gcs = 3;
+}
 ```
 
 ##### S3 Protocol Definitions
@@ -304,7 +318,7 @@ message S3BucketInfo {
     S3AddressingStyle addressing_style = 4;
 }
 
-message S3AccessInfo {
+message S3CredentialInfo {
     // S3 access key ID.
     string access_key_id = 1;
 
@@ -336,7 +350,7 @@ message AzureBucketInfo {
     string storage_account = 1;
 }
 
-message AzureAccessInfo {
+message AzureCredentialInfo {
     // Azure access token.
     // Note that the Azure spec includes the resource URI as well as token in its definition.
     // https://learn.microsoft.com/en-us/azure/storage/common/media/storage-sas-overview/sas-storage-uri.svg
@@ -359,7 +373,7 @@ message GcsBucketInfo {
     string bucket_name = 2;
 }
 
-message GcsAccessInfo {
+message GcsCredentialInfo {
     // HMAC access ID.
     string access_id = 1;
 
@@ -371,6 +385,40 @@ message GcsAccessInfo {
 
     // GCS service account name.
     string service_account = 4;
+}
+```
+
+#### Shared Definitions
+
+```protobuf
+message AuthenticationType {
+    enum Type {
+        UNKNOWN = 0;
+
+        // The Provisioner should generate a protocol-appropriate access key that clients can use to
+        // authenticate to the backend object store.
+        KEY = 1;
+
+        // The Provisioner should configure the system such that Pods using the given ServiceAccount
+        // authenticate to the backend object store automatically.
+        SERVICE_ACCOUNT = 2;
+    }
+    Type type = 1;
+}
+
+message AccessMode {
+    enum Mode {
+        UNKNOWN = 0;
+
+        // Read/Write access mode.
+        READ_WRITE = 1;
+
+        // Read-only access mode.
+        READ_ONLY = 2;
+
+        // Write-only access mode.
+        WRITE_ONLY = 3;
+    }
 }
 ```
 
@@ -444,21 +492,75 @@ message DriverCreateBucketResponse {
 
 #### DriverGetExistingBucket
 
+A Plugin MUST implement this RPC call.
+
+This operation MUST be idempotent. If a bucket corresponding to the specified name already exists
+and is compatible with the given parameters, the Plugin MUST reply OK.
+
+Important return codes:
+* `AlreadyExists` (not retryable) when the bucket already exists but is incompatible with the request.
+* `NotFound` (retryable) when the bucket does not exist.
+* `InvalidArgument` (not retryable) if any parameters are invalid for the backend.
+
 ```protobuf
 message DriverGetExistingBucketRequest {
-    // TODO: unimplemented
+    // REQUIRED. The unique identifier for the existing backend bucket known to the Provisioner.
+    // Provisioner MUST be able to correlate `bucket_id` to the backend bucket.
+    // It is RECOMMENDED to use the backend storage system's bucket ID.
+    string existing_bucket_id = 1;
+
+    // OPTIONAL. A list of all object storage protocols the provisioned bucket MUST support.
+    // If none are given, the provisioner MAY provision with a set of default protocol(s) or return
+    // `InvalidArgument` with a message indicating that it requires this input.
+    // If any protocol cannot be supported, the Provisioner MUST return `InvalidArgument`.
+    repeated ObjectProtocol protocols = 2;
+
+    // OPTIONAL. Plugin specific parameters passed in as opaque key-value pairs.
+    // The Plugin is responsible for parsing and validating these parameters.
+    map<string, string> parameters = 4;
 }
 
 message DriverGetExistingBucketResponse {
-    // TODO: unimplemented
+    // REQUIRED. The unique identifier for the backend bucket known to the Provisioner.
+    // This value WILL be used by COSI to make subsequent calls related to the bucket, so the
+    // Provisioner MUST be able to correlate `bucket_id` to the backend bucket.
+    // It is RECOMMENDED to use the backend storage system's bucket ID.
+    string bucket_id = 1;
+
+    // REQUIRED: At least one protocol bucket info result MUST be non-nil.
+    //
+    // The primary purpose of this response is to indicate which protocols are supported for
+    // subsequent DriverGrantBucketAccess requests referencing this provisioned bucket. A non-nil
+    // bucket info corresponding to a protocol indicates support.
+    //
+    // The Provisioner MUST indicate support for the protocols in the request. It MAY indicate
+    // support for more protocols than the request. It SHOULD indicate support for all supported
+    // protocols. It MUST NOT indicate support (return a non-nil result) for unsupported protocols.
+    //
+    // The secondary purpose of this response is to report non-credential information about the
+    // bucket. COSI does not expose this information to end-users until a subsequent
+    // DriverGrantBucketAccess is provisioned referencing this bucket. Instead, the info is exposed
+    // to administrators so that they might more easily debug errors in their configuration of COSI.
+    // It is thus RECOMMENDED to return all relevant bucket info for all supported protocols.
+    // However, the Provisioner MAY omit any or all bucket info fields as desired.
+    ObjectProtocolAndBucketInfo protocols = 2;
 }
 ```
 
 #### DriverDeleteBucket
 
+A Plugin MUST implement this RPC call.
+
+This operation MUST be idempotent. If a bucket corresponding to the specified name does not exist,
+the Plugin MUST reply OK.
+
 ```protobuf
 message DriverDeleteBucketRequest {
-    // TODO: unimplemented
+    // REQUIRED. The unique identifier for the existing backend bucket known to the Provisioner.
+    string bucket_id = 1;
+
+    // OPTIONAL. Plugin specific parameters associated with the provisioned bucket.
+    map<string, string> parameters = 4;
 }
 
 message DriverDeleteBucketResponse {
@@ -468,21 +570,127 @@ message DriverDeleteBucketResponse {
 
 #### DriverGrantBucketAccess
 
+A Plugin MUST implement this RPC call.
+
+This operation MUST be idempotent. If an access corresponding to the specified name already exists
+and is compatible with the given parameters, the Plugin MUST reply OK.
+
+Important driver return codes:
+* `AlreadyExists` (not retryable) when the bucket already exists but is incompatible with the request.
+* `InvalidArgument` (not retryable) if `AuthenticationType` is not supported.
+* `InvalidArgument` (not retryable) if any parameters are invalid for the backend.
+* `OutOfRange` (not retryable) if (and only if) the driver does not support creating a single shared access credential for multiple buckets.
+
 ```protobuf
 message DriverGrantBucketAccessRequest {
-    // TODO: unimplemented
+    // REQUIRED. The suggested name for the backend bucket access.
+    // It serves two purposes:
+    // 1) Suggested name - COSI WILL suggest a name that includes a UID component that is
+    //    statistically likely to be globally unique.
+    // 2) Idempotency - This name is generated by COSI to achieve idempotency. The Plugin SHOULD
+    //    ensure that multiple DriverGrantBucketAccess calls for the same name do not result in more
+    //    than one Bucket being provisioned corresponding to the name.
+    //    The COSI Sidecar WILL call DriverGrantBucketAccess, with the same name, periodically to
+    //    ensure the bucket exists.
+    //    Using or appending random identifiers can lead to multiple unused buckets being created in
+    //    the storage backend in the event of timing-related Driver/Sidecar failures or restarts.
+    // COSI WILL use DNS subdomain format (https://datatracker.ietf.org/doc/html/rfc1123).
+    // It WILL contain contain no more than 253 characters, contain only lowercase alphanumeric
+    // characters, '-' or '.', start with an alphanumeric character, and end with an alphanumeric
+    // character.
+    string account_name = 1;
+
+    // REQUIRED. The object storage protocol the provisioned access MUST support.
+    // If the protocol cannot be supported, the Provisioner MUST return `InvalidArgument`.
+    ObjectProtocol protocol = 2;
+
+    // REQUIRED. The authentication type that the Provisioner MUST provision for this request.
+    AuthenticationType authentication_type = 3;
+
+    // REQUIRED when `authentication_type` is `SERVICE_ACCOUNT`.
+    // OPTIONAL for all other authentication types.
+    // COSI WILL NOT set this when the requested `authentication_type` is not `SERVICE_ACCOUNT`.
+    string service_account_name = 4;
+
+    // OPTIONAL. Plugin specific parameters passed in as opaque key-value pairs.
+    // The Plugin is responsible for parsing and validating these parameters.
+    map<string, string> parameters = 5;
+
+    message AccessedBucket {
+        // REQUIRED. The unique identifier for the backend bucket known to the Provisioner.
+        string bucket_id = 1;
+
+        // REQUIRED. The read/write access mode that the Provisioner SHOULD provision for the bucket
+        // associated with `bucket_id`.
+        AccessMode access_mode = 2;
+    }
+
+    // REQUIRED. Access to at least one bucket MUST be requested.
+    repeated AccessedBucket buckets = 6;
 }
 
 message DriverGrantBucketAccessResponse {
-    // TODO: unimplemented
+    // REQUIRED. The unique identifier for the backend access account known to the Provisioner.
+    // This value WILL be used by COSI to make subsequent calls related to the access, so the
+    // Provisioner MUST be able to correlate `account_id` to the backend access.
+    // It is RECOMMENDED to use the backend storage system's bucket ID.
+    string account_id = 1;
+
+    message BucketInfo {
+        // REQUIRED. The unique identifier for the backend bucket known to the Provisioner.
+        string bucket_id = 1;
+
+        // REQUIRED: EXACTLY one protocol bucket info result MUST be non-nil.
+        // The Provisioner MUST fill in all required bucket info for the requested protocol.
+        // The Provisioner SHOULD fill in as much bucket info as is known given the parameters.
+        // It MUST NOT support (return a non-nil result) non-requested protocols.
+        // COSI WILL expose this information to users, and it WILL be treated as sensitive/secret
+        // information.
+        // COSI WILL not log the information or store it in plaintext.
+        ObjectProtocolAndBucketInfo bucket_info = 2;
+    }
+
+    // REQUIRED. The Provisioner MUST return info for all `buckets` in the request.
+    repeated BucketInfo buckets = 2;
+
+    // REQUIRED.
+    CredentialInfo credentials = 3;
 }
 ```
 
 #### DriverRevokeBucketAccess
 
+A Plugin MUST implement this RPC call.
+
+This operation MUST be idempotent. If an access corresponding to the specified name already doesn't
+exist, the Plugin MUST reply OK.
+
 ```protobuf
 message DriverRevokeBucketAccessRequest {
-    // TODO: unimplemented
+    // REQUIRED. The unique identifier for the backend access account
+    string account_id = 1;
+
+    // REQUIRED. The object storage protocol associated with the provisioned access.
+    ObjectProtocol protocol = 2;
+
+    // REQUIRED. The authentication type associated with the provisioned access.
+    AuthenticationType authentication_type = 3;
+
+    // REQUIRED when `authentication_type` is `SERVICE_ACCOUNT`.
+    // OPTIONAL for all other authentication types.
+    // COSI WILL NOT set this when the requested `authentication_type` is not `SERVICE_ACCOUNT`.
+    string service_account_name = 4;
+
+    // OPTIONAL. Plugin specific parameters associated with the provisioned access.
+    map<string, string> parameters = 5;
+
+    message AccessedBucket {
+        // REQUIRED. The unique identifier for the backend bucket known to the Provisioner.
+        string bucket_id = 1;
+    }
+
+    // REQUIRED. Buckets associated with the provisioned access.
+    repeated AccessedBucket buckets = 6;
 }
 
 message DriverRevokeBucketAccessResponse {

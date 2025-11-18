@@ -17,16 +17,21 @@ limitations under the License.
 package protocol
 
 import (
+	"fmt"
+
 	cosiapi "sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha2"
 	cosiproto "sigs.k8s.io/container-object-storage-interface/proto"
 )
 
-// AzureBucketInfoTranslator implements RpcApiTranslator for S3 bucket info.
+// AzureBucketInfoTranslator implements RpcApiTranslator for Azure bucket info.
 type AzureBucketInfoTranslator struct{}
 
-// TODO: S3CredentialTranslator implements RpcApiTranslator for S3 credentials.
-
 var _ RpcApiTranslator[*cosiproto.AzureBucketInfo, cosiapi.BucketInfoVar] = AzureBucketInfoTranslator{}
+
+// AzureCredentialTranslator implements RpcApiTranslator for Azure credentials.
+type AzureCredentialTranslator struct{}
+
+var _ RpcApiTranslator[*cosiproto.AzureCredentialInfo, cosiapi.CredentialVar] = AzureCredentialTranslator{}
 
 func (AzureBucketInfoTranslator) RpcToApi(b *cosiproto.AzureBucketInfo) map[cosiapi.BucketInfoVar]string {
 	if b == nil {
@@ -34,10 +39,8 @@ func (AzureBucketInfoTranslator) RpcToApi(b *cosiproto.AzureBucketInfo) map[cosi
 	}
 
 	out := map[cosiapi.BucketInfoVar]string{
-		cosiapi.BucketInfoVar_Azure_StorageAccount: "",
+		cosiapi.BucketInfoVar_Azure_StorageAccount: b.StorageAccount,
 	}
-
-	// TODO: implement
 
 	return out
 }
@@ -47,15 +50,72 @@ func (AzureBucketInfoTranslator) ApiToRpc(vars map[cosiapi.BucketInfoVar]string)
 		return nil
 	}
 
-	// TODO: implement
+	out := &cosiproto.AzureBucketInfo{}
 
-	return nil
+	out.StorageAccount = vars[cosiapi.BucketInfoVar_Azure_StorageAccount]
+
+	return out
 }
 
 func (AzureBucketInfoTranslator) Validate(
 	vars map[cosiapi.BucketInfoVar]string, _ cosiapi.BucketAccessAuthenticationType,
 ) error {
-	// TODO: implement
+	errs := []string{}
 
+	storageAccount := vars[cosiapi.BucketInfoVar_Azure_StorageAccount]
+	if storageAccount == "" {
+		errs = append(errs, "azure storage account cannot be unset")
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("azure bucket info is invalid: %v", errs)
+	}
+	return nil
+}
+
+func (AzureCredentialTranslator) RpcToApi(c *cosiproto.AzureCredentialInfo) map[cosiapi.CredentialVar]string {
+	if c == nil {
+		return nil
+	}
+
+	out := map[cosiapi.CredentialVar]string{
+		cosiapi.CredentialVar_Azure_AccessToken:     c.AccessToken,
+		cosiapi.CredentialVar_Azure_ExpiryTimestamp: c.ExpiryTimestamp,
+	}
+
+	return out
+}
+
+func (AzureCredentialTranslator) ApiToRpc(vars map[cosiapi.CredentialVar]string) *cosiproto.AzureCredentialInfo {
+	if len(vars) == 0 {
+		return nil
+	}
+
+	out := &cosiproto.AzureCredentialInfo{}
+
+	out.AccessToken = vars[cosiapi.CredentialVar_Azure_AccessToken]
+	out.ExpiryTimestamp = vars[cosiapi.CredentialVar_Azure_ExpiryTimestamp]
+
+	return out
+}
+
+func (AzureCredentialTranslator) Validate(
+	vars map[cosiapi.CredentialVar]string, authType cosiapi.BucketAccessAuthenticationType,
+) error {
+	//credentials are only required when authentication type is "Key"
+	if authType != cosiapi.BucketAccessAuthenticationTypeKey {
+		return nil
+	}
+
+	errs := []string{}
+
+	accessToken := vars[cosiapi.CredentialVar_Azure_AccessToken]
+	if accessToken == "" {
+		errs = append(errs, "azure access token cannot be unset")
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("azure credential info is invalid: %v", errs)
+	}
 	return nil
 }

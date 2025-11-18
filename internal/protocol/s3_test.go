@@ -159,3 +159,85 @@ func TestS3BucketInfoTranslator_RpcToApi(t *testing.T) {
 		})
 	}
 }
+
+func TestS3CredentialTranslator_RoundTrips(t *testing.T) {
+	tests := []struct {
+		name    string
+		vars    map[cosiapi.CredentialVar]string
+		wantRpc *cosiproto.S3CredentialInfo
+	}{
+		{"nil info", nil, nil},
+		{"empty info", map[cosiapi.CredentialVar]string{}, nil},
+		{"info all set", map[cosiapi.CredentialVar]string{
+			cosiapi.CredentialVar_S3_AccessKeyId:     "FAKEACCESSKEY",
+			cosiapi.CredentialVar_S3_AccessSecretKey: "FAKESECRETKEY",
+		},
+			&cosiproto.S3CredentialInfo{
+				AccessKeyId:     "FAKEACCESSKEY",
+				AccessSecretKey: "FAKESECRETKEY",
+			},
+		},
+		{"all set empty",
+			map[cosiapi.CredentialVar]string{
+				cosiapi.CredentialVar_S3_AccessKeyId:     "",
+				cosiapi.CredentialVar_S3_AccessSecretKey: "",
+			},
+			&cosiproto.S3CredentialInfo{
+				AccessKeyId:     "",
+				AccessSecretKey: "",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := S3CredentialTranslator{}
+			rpc := s.ApiToRpc(tt.vars)
+			assert.Equal(t, tt.wantRpc, rpc)
+
+			api := s.RpcToApi(rpc)
+			if len(tt.vars) == 0 {
+				assert.Nil(t, api)
+			} else {
+				assert.Equal(t, tt.vars, api)
+			}
+		})
+	}
+}
+
+func TestS3CredentialTranslator_RpcToApi(t *testing.T) {
+	tests := []struct {
+		name    string
+		rpc     *cosiproto.S3CredentialInfo
+		wantApi map[cosiapi.CredentialVar]string
+	}{
+		{"nil input", nil, nil},
+		{"empty input",
+			&cosiproto.S3CredentialInfo{},
+			map[cosiapi.CredentialVar]string{
+				cosiapi.CredentialVar_S3_AccessKeyId:     "",
+				cosiapi.CredentialVar_S3_AccessSecretKey: "",
+			},
+		},
+		{"all fields set",
+			&cosiproto.S3CredentialInfo{
+				AccessKeyId:     "FAKEACCESSKEY",
+				AccessSecretKey: "FAKESECRETKEY",
+			},
+			map[cosiapi.CredentialVar]string{
+				cosiapi.CredentialVar_S3_AccessKeyId:     "FAKEACCESSKEY",
+				cosiapi.CredentialVar_S3_AccessSecretKey: "FAKESECRETKEY",
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := S3CredentialTranslator{}
+			api := s.RpcToApi(tt.rpc)
+			assert.Equal(t, tt.wantApi, api)
+
+			for k := range api {
+				assert.True(t, strings.HasPrefix(string(k), "COSI_S3_"))
+			}
+		})
+	}
+}

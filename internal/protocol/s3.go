@@ -36,9 +36,12 @@ var (
 // S3BucketInfoTranslator implements RpcApiTranslator for S3 bucket info.
 type S3BucketInfoTranslator struct{}
 
-// TODO: S3CredentialTranslator implements RpcApiTranslator for S3 credentials.
-
 var _ RpcApiTranslator[*cosiproto.S3BucketInfo, cosiapi.BucketInfoVar] = S3BucketInfoTranslator{}
+
+// S3CredentialTranslator implements RpcApiTranslator for S3 credentials.
+type S3CredentialTranslator struct{}
+
+var _ RpcApiTranslator[*cosiproto.S3CredentialInfo, cosiapi.CredentialVar] = S3CredentialTranslator{}
 
 func (S3BucketInfoTranslator) RpcToApi(b *cosiproto.S3BucketInfo) map[cosiapi.BucketInfoVar]string {
 	if b == nil {
@@ -117,6 +120,58 @@ func (S3BucketInfoTranslator) Validate(
 
 	if len(errs) > 0 {
 		return fmt.Errorf("S3 bucket info is invalid: %v", errs)
+	}
+	return nil
+}
+
+func (S3CredentialTranslator) RpcToApi(c *cosiproto.S3CredentialInfo) map[cosiapi.CredentialVar]string {
+	if c == nil {
+		return nil
+	}
+
+	out := map[cosiapi.CredentialVar]string{
+		cosiapi.CredentialVar_S3_AccessKeyId:     c.AccessKeyId,
+		cosiapi.CredentialVar_S3_AccessSecretKey: c.AccessSecretKey,
+	}
+
+	return out
+}
+
+func (S3CredentialTranslator) ApiToRpc(vars map[cosiapi.CredentialVar]string) *cosiproto.S3CredentialInfo {
+	if len(vars) == 0 {
+		return nil
+	}
+
+	out := &cosiproto.S3CredentialInfo{}
+
+	out.AccessKeyId = vars[cosiapi.CredentialVar_S3_AccessKeyId]
+	out.AccessSecretKey = vars[cosiapi.CredentialVar_S3_AccessSecretKey]
+
+	return out
+}
+
+func (S3CredentialTranslator) Validate(
+	vars map[cosiapi.CredentialVar]string, authType cosiapi.BucketAccessAuthenticationType,
+) error {
+	// credentials are only required when authentication type is "Key"
+	if authType != cosiapi.BucketAccessAuthenticationTypeKey {
+		return nil
+	}
+
+	errs := []string{}
+
+	accessKeyId := vars[cosiapi.CredentialVar_S3_AccessKeyId]
+	if accessKeyId == "" {
+		errs = append(errs, "S3 access key ID cannot be unset")
+	}
+
+	accessSecretKey := vars[cosiapi.CredentialVar_S3_AccessSecretKey]
+	if accessSecretKey == "" {
+		errs = append(errs, "S3 access secret key cannot be unset")
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("S3 credential info is invalid: %v", errs)
 	}
 	return nil
 }

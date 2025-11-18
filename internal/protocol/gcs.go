@@ -17,16 +17,21 @@ limitations under the License.
 package protocol
 
 import (
+	"fmt"
+
 	cosiapi "sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha2"
 	cosiproto "sigs.k8s.io/container-object-storage-interface/proto"
 )
 
-// GcsBucketInfoTranslator implements RpcApiTranslator for S3 bucket info.
+// GcsBucketInfoTranslator implements RpcApiTranslator for GCS bucket info.
 type GcsBucketInfoTranslator struct{}
 
-// TODO: S3CredentialTranslator implements RpcApiTranslator for S3 credentials.
-
 var _ RpcApiTranslator[*cosiproto.GcsBucketInfo, cosiapi.BucketInfoVar] = GcsBucketInfoTranslator{}
+
+// GcsCredentialTranslator implements RpcApiTranslator for GCS credentials.
+type GcsCredentialTranslator struct{}
+
+var _ RpcApiTranslator[*cosiproto.GcsCredentialInfo, cosiapi.CredentialVar] = GcsCredentialTranslator{}
 
 func (GcsBucketInfoTranslator) RpcToApi(b *cosiproto.GcsBucketInfo) map[cosiapi.BucketInfoVar]string {
 	if b == nil {
@@ -34,11 +39,9 @@ func (GcsBucketInfoTranslator) RpcToApi(b *cosiproto.GcsBucketInfo) map[cosiapi.
 	}
 
 	out := map[cosiapi.BucketInfoVar]string{
-		cosiapi.BucketInfoVar_GCS_BucketName: "",
-		cosiapi.BucketInfoVar_GCS_ProjectId:  "",
+		cosiapi.BucketInfoVar_GCS_BucketName: b.BucketName,
+		cosiapi.BucketInfoVar_GCS_ProjectId:  b.ProjectId,
 	}
-
-	// TODO: implement
 
 	return out
 }
@@ -48,15 +51,96 @@ func (GcsBucketInfoTranslator) ApiToRpc(vars map[cosiapi.BucketInfoVar]string) *
 		return nil
 	}
 
-	// TODO: implement
+	out := &cosiproto.GcsBucketInfo{}
 
-	return nil
+	out.BucketName = vars[cosiapi.BucketInfoVar_GCS_BucketName]
+	out.ProjectId = vars[cosiapi.BucketInfoVar_GCS_ProjectId]
+
+	return out
 }
 
 func (GcsBucketInfoTranslator) Validate(
 	vars map[cosiapi.BucketInfoVar]string, _ cosiapi.BucketAccessAuthenticationType,
 ) error {
-	// TODO: implement
+	errs := []string{}
 
+	bucketName := vars[cosiapi.BucketInfoVar_GCS_BucketName]
+	if bucketName == "" {
+		errs = append(errs, "GCS bucket name cannot be unset")
+	}
+
+	projectId := vars[cosiapi.BucketInfoVar_GCS_ProjectId]
+	if projectId == "" {
+		errs = append(errs, "GCS project ID cannot be unset")
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("GCS bucket info is invalid: %v", errs)
+	}
+	return nil
+}
+
+func (GcsCredentialTranslator) RpcToApi(c *cosiproto.GcsCredentialInfo) map[cosiapi.CredentialVar]string {
+	if c == nil {
+		return nil
+	}
+
+	out := map[cosiapi.CredentialVar]string{
+		cosiapi.CredentialVar_GCS_AccessId:       c.AccessId,
+		cosiapi.CredentialVar_GCS_AccessSecret:   c.AccessSecret,
+		cosiapi.CredentialVar_GCS_PrivateKeyName: c.PrivateKeyName,
+		cosiapi.CredentialVar_GCS_ServiceAccount: c.ServiceAccount,
+	}
+
+	return out
+}
+
+func (GcsCredentialTranslator) ApiToRpc(vars map[cosiapi.CredentialVar]string) *cosiproto.GcsCredentialInfo {
+	if len(vars) == 0 {
+		return nil
+	}
+
+	out := &cosiproto.GcsCredentialInfo{}
+
+	out.AccessId = vars[cosiapi.CredentialVar_GCS_AccessId]
+	out.AccessSecret = vars[cosiapi.CredentialVar_GCS_AccessSecret]
+	out.PrivateKeyName = vars[cosiapi.CredentialVar_GCS_PrivateKeyName]
+	out.ServiceAccount = vars[cosiapi.CredentialVar_GCS_ServiceAccount]
+
+	return out
+}
+
+func (GcsCredentialTranslator) Validate(
+	vars map[cosiapi.CredentialVar]string, authType cosiapi.BucketAccessAuthenticationType,
+) error {
+	errs := []string{}
+
+	switch authType {
+	case cosiapi.BucketAccessAuthenticationTypeKey:
+		accessId := vars[cosiapi.CredentialVar_GCS_AccessId]
+		if accessId == "" {
+			errs = append(errs, "GCS access ID cannot be unset")
+		}
+
+		accessSecret := vars[cosiapi.CredentialVar_GCS_AccessSecret]
+		if accessSecret == "" {
+			errs = append(errs, "GCS access secret cannot be unset")
+		}
+
+	case cosiapi.BucketAccessAuthenticationTypeServiceAccount:
+		privateKeyName := vars[cosiapi.CredentialVar_GCS_PrivateKeyName]
+		if privateKeyName == "" {
+			errs = append(errs, "GCS private key name cannot be unset")
+		}
+
+		serviceAccount := vars[cosiapi.CredentialVar_GCS_ServiceAccount]
+		if serviceAccount == "" {
+			errs = append(errs, "GCS service account cannot be unset")
+		}
+	}
+
+	if len(errs) > 0 {
+		return fmt.Errorf("GCS credential info is invalid: %v", errs)
+	}
 	return nil
 }

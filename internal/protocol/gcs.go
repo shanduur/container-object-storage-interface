@@ -17,6 +17,7 @@ limitations under the License.
 package protocol
 
 import (
+	"errors"
 	"fmt"
 
 	cosiapi "sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha2"
@@ -62,20 +63,20 @@ func (GcsBucketInfoTranslator) ApiToRpc(vars map[cosiapi.BucketInfoVar]string) *
 func (GcsBucketInfoTranslator) Validate(
 	vars map[cosiapi.BucketInfoVar]string, _ cosiapi.BucketAccessAuthenticationType,
 ) error {
-	errs := []string{}
+	errs := []error{}
 
 	bucketName := vars[cosiapi.BucketInfoVar_GCS_BucketName]
 	if bucketName == "" {
-		errs = append(errs, "GCS bucket name cannot be unset")
+		errs = append(errs, fmt.Errorf("GCS bucket name cannot be unset"))
 	}
 
 	projectId := vars[cosiapi.BucketInfoVar_GCS_ProjectId]
 	if projectId == "" {
-		errs = append(errs, "GCS project ID cannot be unset")
+		errs = append(errs, fmt.Errorf("GCS project ID cannot be unset"))
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("GCS bucket info is invalid: %v", errs)
+		return fmt.Errorf("GCS bucket info is invalid: %w", errors.Join(errs...))
 	}
 	return nil
 }
@@ -113,34 +114,34 @@ func (GcsCredentialTranslator) ApiToRpc(vars map[cosiapi.CredentialVar]string) *
 func (GcsCredentialTranslator) Validate(
 	vars map[cosiapi.CredentialVar]string, authType cosiapi.BucketAccessAuthenticationType,
 ) error {
-	errs := []string{}
+	errs := []error{}
 
 	switch authType {
 	case cosiapi.BucketAccessAuthenticationTypeKey:
 		accessId := vars[cosiapi.CredentialVar_GCS_AccessId]
 		if accessId == "" {
-			errs = append(errs, "GCS access ID cannot be unset")
+			errs = append(errs, fmt.Errorf("GCS access ID cannot be unset"))
 		}
 
 		accessSecret := vars[cosiapi.CredentialVar_GCS_AccessSecret]
 		if accessSecret == "" {
-			errs = append(errs, "GCS access secret cannot be unset")
+			errs = append(errs, fmt.Errorf("GCS access secret cannot be unset"))
 		}
 
 	case cosiapi.BucketAccessAuthenticationTypeServiceAccount:
 		privateKeyName := vars[cosiapi.CredentialVar_GCS_PrivateKeyName]
 		if privateKeyName == "" {
-			errs = append(errs, "GCS private key name cannot be unset")
+			errs = append(errs, fmt.Errorf("GCS private key name cannot be unset"))
 		}
 
 		serviceAccount := vars[cosiapi.CredentialVar_GCS_ServiceAccount]
 		if serviceAccount == "" {
-			errs = append(errs, "GCS service account cannot be unset")
+			errs = append(errs, fmt.Errorf("GCS service account cannot be unset"))
 		}
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("GCS credential info is invalid: %v", errs)
+		return fmt.Errorf("GCS credential info is invalid: %w", errors.Join(errs...))
 	}
 	return nil
 }

@@ -317,13 +317,13 @@ func parseProtocolBucketInfo(pbi *cosiproto.ObjectProtocolAndBucketInfo) (
 
 // convert an API proto list into an RPC proto message list
 func objectProtocolListFromApiList(apiList []cosiapi.ObjectProtocol) ([]*cosiproto.ObjectProtocol, error) {
-	errs := []string{}
+	errs := []error{}
 	out := []*cosiproto.ObjectProtocol{}
 
 	for _, apiProto := range apiList {
 		rpcProto, err := protocol.ObjectProtocolTranslator{}.ApiToRpc(apiProto)
 		if err != nil {
-			errs = append(errs, err.Error())
+			errs = append(errs, err)
 			continue
 		}
 		out = append(out, &cosiproto.ObjectProtocol{
@@ -332,7 +332,7 @@ func objectProtocolListFromApiList(apiList []cosiapi.ObjectProtocol) ([]*cosipro
 	}
 
 	if len(errs) > 0 {
-		return nil, fmt.Errorf("failed to parse protocol list: %v", errs)
+		return nil, fmt.Errorf("failed to parse protocol list: %w", errors.Join(errs...))
 	}
 	return out, nil
 }
@@ -362,7 +362,7 @@ func validateBucketSupportsProtocols(supported, required []cosiapi.ObjectProtoco
 		}
 	}
 	if len(unsupported) > 0 {
-		return fmt.Errorf("required protocols are not supported: %v", required)
+		return fmt.Errorf("required protocols are not supported: %v", unsupported)
 	}
 	return nil
 }

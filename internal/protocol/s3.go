@@ -17,6 +17,7 @@ limitations under the License.
 package protocol
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 
@@ -97,30 +98,30 @@ func (S3BucketInfoTranslator) ApiToRpc(vars map[cosiapi.BucketInfoVar]string) *c
 func (S3BucketInfoTranslator) Validate(
 	vars map[cosiapi.BucketInfoVar]string, _ cosiapi.BucketAccessAuthenticationType,
 ) error {
-	errs := []string{}
+	errs := []error{}
 
 	id := vars[cosiapi.BucketInfoVar_S3_BucketId]
 	if id == "" {
-		errs = append(errs, "S3 bucket ID cannot be unset")
+		errs = append(errs, fmt.Errorf("S3 bucket ID cannot be unset"))
 	}
 
 	ep := vars[cosiapi.BucketInfoVar_S3_Endpoint]
 	if ep == "" {
-		errs = append(errs, "S3 endpoint cannot be unset")
+		errs = append(errs, fmt.Errorf("S3 endpoint cannot be unset"))
 	}
 
 	rg := vars[cosiapi.BucketInfoVar_S3_Region]
 	if rg == "" {
-		errs = append(errs, "S3 region cannot be unset")
+		errs = append(errs, fmt.Errorf("S3 region cannot be unset"))
 	}
 
 	as := vars[cosiapi.BucketInfoVar_S3_AddressingStyle]
 	if !slices.Contains(validS3AddressingStyles, as) {
-		errs = append(errs, fmt.Sprintf("S3 addressing style %q must be one of %v", as, validS3AddressingStyles))
+		errs = append(errs, fmt.Errorf("S3 addressing style %q must be one of %v", as, validS3AddressingStyles))
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("S3 bucket info is invalid: %v", errs)
+		return fmt.Errorf("S3 bucket info is invalid: %w", errors.Join(errs...))
 	}
 	return nil
 }
@@ -159,20 +160,20 @@ func (S3CredentialTranslator) Validate(
 		return nil
 	}
 
-	errs := []string{}
+	errs := []error{}
 
 	accessKeyId := vars[cosiapi.CredentialVar_S3_AccessKeyId]
 	if accessKeyId == "" {
-		errs = append(errs, "S3 access key ID cannot be unset")
+		errs = append(errs, fmt.Errorf("S3 access key ID cannot be unset"))
 	}
 
 	accessSecretKey := vars[cosiapi.CredentialVar_S3_AccessSecretKey]
 	if accessSecretKey == "" {
-		errs = append(errs, "S3 access secret key cannot be unset")
+		errs = append(errs, fmt.Errorf("S3 access secret key cannot be unset"))
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("S3 credential info is invalid: %v", errs)
+		return fmt.Errorf("S3 credential info is invalid: %w", errors.Join(errs...))
 	}
 	return nil
 }

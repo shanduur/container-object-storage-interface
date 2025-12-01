@@ -17,6 +17,7 @@ limitations under the License.
 package protocol
 
 import (
+	"errors"
 	"fmt"
 
 	cosiapi "sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha2"
@@ -60,15 +61,15 @@ func (AzureBucketInfoTranslator) ApiToRpc(vars map[cosiapi.BucketInfoVar]string)
 func (AzureBucketInfoTranslator) Validate(
 	vars map[cosiapi.BucketInfoVar]string, _ cosiapi.BucketAccessAuthenticationType,
 ) error {
-	errs := []string{}
+	errs := []error{}
 
 	storageAccount := vars[cosiapi.BucketInfoVar_Azure_StorageAccount]
 	if storageAccount == "" {
-		errs = append(errs, "azure storage account cannot be unset")
+		errs = append(errs, fmt.Errorf("azure storage account cannot be unset"))
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("azure bucket info is invalid: %v", errs)
+		return fmt.Errorf("azure bucket info is invalid: %w", errors.Join(errs...))
 	}
 	return nil
 }
@@ -107,15 +108,15 @@ func (AzureCredentialTranslator) Validate(
 		return nil
 	}
 
-	errs := []string{}
+	errs := []error{}
 
 	accessToken := vars[cosiapi.CredentialVar_Azure_AccessToken]
 	if accessToken == "" {
-		errs = append(errs, "azure access token cannot be unset")
+		errs = append(errs, fmt.Errorf("azure access token cannot be unset"))
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("azure credential info is invalid: %v", errs)
+		return fmt.Errorf("azure credential info is invalid: %w", errors.Join(errs...))
 	}
 	return nil
 }

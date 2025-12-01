@@ -306,7 +306,7 @@ func getAllBucketClaims(
 	}
 
 	if len(errs) > 0 {
-		return nil, fmt.Errorf("could not get one or more BucketClaims: %v", errs)
+		return nil, fmt.Errorf("could not get one or more BucketClaims: %w", errors.Join(errs...))
 	}
 
 	if len(claims) != len(claimAccesses) {
@@ -345,7 +345,7 @@ func markAllBucketClaimsAsAccessed(
 		}
 	}
 	if len(errs) > 0 {
-		return fmt.Errorf("failed to mark one or more BucketClaims as having a BucketAccess reference: %v", errs)
+		return fmt.Errorf("failed to mark one or more BucketClaims as having a BucketAccess reference: %w", errors.Join(errs...))
 	}
 
 	return nil
@@ -356,28 +356,28 @@ func validateAccessAgainstClass(
 	class *cosiapi.BucketAccessClassSpec,
 	access *cosiapi.BucketAccessSpec,
 ) error {
-	errs := []string{}
+	errs := []error{}
 
 	needServiceAccount := class.AuthenticationType == cosiapi.BucketAccessAuthenticationTypeServiceAccount
 	if needServiceAccount && access.ServiceAccountName == "" {
-		errs = append(errs, "serviceAccountName must be specified")
+		errs = append(errs, fmt.Errorf("serviceAccountName must be specified"))
 	}
 
 	if class.FeatureOptions.DisallowMultiBucketAccess && len(access.BucketClaims) > 1 {
-		errs = append(errs, "multi-bucket access is disallowed")
+		errs = append(errs, fmt.Errorf("multi-bucket access is disallowed"))
 	}
 
 	for _, claimRef := range access.BucketClaims {
 		if slices.Contains(class.FeatureOptions.DisallowedBucketAccessModes, claimRef.AccessMode) {
 			errs = append(errs,
-				fmt.Sprintf("accessMode %q requested for BucketClaim %q is disallowed",
+				fmt.Errorf("accessMode %q requested for BucketClaim %q is disallowed",
 					claimRef.AccessMode, claimRef.BucketClaimName),
 			)
 		}
 	}
 
 	if len(errs) > 0 {
-		return fmt.Errorf("one or more features are disallowed by the BucketAccessClass: %v", errs)
+		return fmt.Errorf("one or more features are disallowed by the BucketAccessClass: %w", errors.Join(errs...))
 	}
 	return nil
 }

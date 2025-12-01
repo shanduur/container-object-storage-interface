@@ -89,5 +89,9 @@ func ClientConn(tmpSockUri string) (*grpc.ClientConn, error) {
 	return grpc.NewClient(tmpSockUri,
 		// nothing fancy for unit tests
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			// Handle server starting slower than client calls in tests
+			grpc.WaitForReady(true),
+		),
 	)
 }

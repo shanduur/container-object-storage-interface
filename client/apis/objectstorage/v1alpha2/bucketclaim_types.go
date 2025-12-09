@@ -21,15 +21,17 @@ import (
 )
 
 // BucketClaimSpec defines the desired state of BucketClaim
+// +kubebuilder:validation:MinProperties=1
 // +kubebuilder:validation:ExactlyOneOf=bucketClassName;existingBucketName
-// +kubebuilder:validation:XValidation:message="bucketClassName is immutable",rule="has(oldSelf.bucketClassName) == has(self.bucketClassName)"
-// +kubebuilder:validation:XValidation:message="existingBucketName is immutable",rule="has(oldSelf.existingBucketName) == has(self.existingBucketName)"
-// +kubebuilder:validation:XValidation:message="protocols list is immutable",rule="has(oldSelf.protocols) == has(self.protocols)"
+// +kubebuilder:validation:XValidation:message="bucketClassName cannot be added or removed after creation",rule="has(oldSelf.bucketClassName) == has(self.bucketClassName)"
+// +kubebuilder:validation:XValidation:message="existingBucketName cannot be added or removed after creation",rule="has(oldSelf.existingBucketName) == has(self.existingBucketName)"
+// +kubebuilder:validation:XValidation:message="protocols list cannot be added or removed after creation",rule="has(oldSelf.protocols) == has(self.protocols)"
 type BucketClaimSpec struct {
 	// bucketClassName selects the BucketClass for provisioning the BucketClaim.
 	// This field is used only for BucketClaim dynamic provisioning.
 	// If unspecified, existingBucketName must be specified for binding to an existing Bucket.
 	// +optional
+	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:MaxLength=253
 	// +kubebuilder:validation:XValidation:message="bucketClassName is immutable",rule="self == oldSelf"
 	BucketClassName string `json:"bucketClassName,omitempty"`
@@ -37,6 +39,7 @@ type BucketClaimSpec struct {
 	// protocols lists object storage protocols that the provisioned Bucket must support.
 	// If specified, COSI will verify that each item is advertised as supported by the driver.
 	// +optional
+	// +listType=set
 	// +kubebuilder:validation:XValidation:message="protocols list is immutable",rule="self == oldSelf"
 	Protocols []ObjectProtocol `json:"protocols,omitempty"`
 
@@ -45,29 +48,32 @@ type BucketClaimSpec struct {
 	// This field is used only for BucketClaim static provisioning.
 	// If unspecified, bucketClassName must be specified for dynamically provisioning a new bucket.
 	// +optional
+	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:MaxLength=253
 	// +kubebuilder:validation:XValidation:message="existingBucketName is immutable",rule="self == oldSelf"
 	ExistingBucketName string `json:"existingBucketName,omitempty"`
 }
 
 // BucketClaimStatus defines the observed state of BucketClaim.
-// +kubebuilder:validation:XValidation:message="boundBucketName is immutable once set",rule="!has(oldSelf.boundBucketName) || has(self.boundBucketName)"
-// +kubebuilder:validation:XValidation:message="protocols is immutable once set",rule="!has(oldSelf.protocols) || has(self.protocols)"
+// +kubebuilder:validation:XValidation:message="boundBucketName cannot be removed once set",rule="!has(oldSelf.boundBucketName) || has(self.boundBucketName)"
+// +kubebuilder:validation:XValidation:message="protocols cannot be removed once set",rule="!has(oldSelf.protocols) || has(self.protocols)"
 type BucketClaimStatus struct {
 	// boundBucketName is the name of the Bucket this BucketClaim is bound to.
 	// +optional
+	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:MaxLength=253
-	// +kubebuilder:validation:XValidation:message="boundBucketName is immutable once set",rule="oldSelf == '' || self == oldSelf"
-	BoundBucketName string `json:"boundBucketName"`
+	// +kubebuilder:validation:XValidation:message="boundBucketName is immutable once set",rule="self == oldSelf"
+	BoundBucketName string `json:"boundBucketName,omitempty"`
 
 	// readyToUse indicates that the bucket is ready for consumption by workloads.
-	ReadyToUse bool `json:"readyToUse"`
+	// +required
+	ReadyToUse *bool `json:"readyToUse,omitempty"`
 
 	// protocols is the set of protocols the bound Bucket reports to support. BucketAccesses can
 	// request access to this BucketClaim using any of the protocols reported here.
 	// +optional
 	// +listType=set
-	Protocols []ObjectProtocol `json:"protocols"`
+	Protocols []ObjectProtocol `json:"protocols,omitempty"`
 
 	// error holds the most recent error message, with a timestamp.
 	// This is cleared when provisioning is successful.
@@ -89,11 +95,11 @@ type BucketClaim struct {
 
 	// spec defines the desired state of BucketClaim
 	// +required
-	Spec BucketClaimSpec `json:"spec"`
+	Spec BucketClaimSpec `json:"spec,omitzero"`
 
 	// status defines the observed state of BucketClaim
 	// +optional
-	Status BucketClaimStatus `json:"status,omitempty,omitzero"`
+	Status BucketClaimStatus `json:"status,omitzero"`
 }
 
 // +kubebuilder:object:root=true

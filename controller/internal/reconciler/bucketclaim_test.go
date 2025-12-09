@@ -289,7 +289,7 @@ func TestBucketClaimReconcile(t *testing.T) {
 		assert.Contains(t, claim.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := claim.Status
 		assert.Equal(t, "bc-qwerty", status.BoundBucketName)
-		assert.Equal(t, false, status.ReadyToUse)
+		assert.Equal(t, false, *status.ReadyToUse)
 		assert.Empty(t, status.Protocols)
 		assert.Nil(t, status.Error)
 
@@ -340,7 +340,7 @@ func TestBucketClaimReconcile(t *testing.T) {
 		assert.Contains(t, claim.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := claim.Status
 		assert.Equal(t, "bc-qwerty", status.BoundBucketName)
-		assert.Equal(t, false, status.ReadyToUse)
+		assert.Equal(t, false, *status.ReadyToUse)
 		assert.Empty(t, status.Protocols)
 		serr := status.Error
 		require.NotNil(t, serr)

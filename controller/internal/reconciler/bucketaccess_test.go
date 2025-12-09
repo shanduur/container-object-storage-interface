@@ -27,6 +27,7 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 	cosiapi "sigs.k8s.io/container-object-storage-interface/client/apis/objectstorage/v1alpha2"
 	"sigs.k8s.io/container-object-storage-interface/internal/handoff"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -168,7 +169,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		assert.Nil(t, status.Error)
 		assert.Equal(t, "", status.AccountID)
 		assert.Equal(t,
@@ -255,7 +256,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		require.NotNil(t, status.Error)
 		assert.NotNil(t, status.Error.Time)
 		assert.NotContains(t, *status.Error.Message, "readwrite-bucket")
@@ -303,7 +304,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		require.NotNil(t, status.Error)
 		assert.NotNil(t, status.Error.Time)
 		assert.Contains(t, *status.Error.Message, "readwrite-bucket")
@@ -359,7 +360,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		require.NotNil(t, status.Error)
 		assert.NotNil(t, status.Error.Time)
 		assert.Contains(t, *status.Error.Message,
@@ -413,7 +414,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		require.NotNil(t, status.Error)
 		assert.NotNil(t, status.Error.Time)
 		assert.Contains(t, *status.Error.Message, "readonly-bucket")
@@ -463,7 +464,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		require.NotNil(t, status.Error)
 		assert.NotNil(t, status.Error.Time)
 		assert.Contains(t, *status.Error.Message, "s3-class")
@@ -491,7 +492,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 
 	t.Run("dynamic provisioning, bucketaccessclass disallows multi-bucket access", func(t *testing.T) {
 		class := baseClass.DeepCopy()
-		class.Spec.FeatureOptions.DisallowMultiBucketAccess = true
+		class.Spec.FeatureOptions.DisallowMultiBucketAccess = ptr.To(true)
 
 		c := newClient(
 			baseAccess.DeepCopy(),
@@ -515,7 +516,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		require.NotNil(t, status.Error)
 		assert.NotNil(t, status.Error.Time)
 		assert.Contains(t, *status.Error.Message, "multi-bucket access")
@@ -548,7 +549,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		}
 
 		class := baseClass.DeepCopy()
-		class.Spec.FeatureOptions.DisallowMultiBucketAccess = true
+		class.Spec.FeatureOptions.DisallowMultiBucketAccess = ptr.To(true)
 
 		c := newClient(
 			access,
@@ -571,7 +572,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		assert.Nil(t, status.Error)
 		assert.Equal(t, "", status.AccountID)
 		assert.Equal(t,
@@ -638,7 +639,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		require.NotNil(t, status.Error)
 		assert.NotNil(t, status.Error.Time)
 		assert.Contains(t, *status.Error.Message, "ReadWrite")
@@ -695,7 +696,7 @@ func TestBucketAccessReconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, access.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		status := access.Status
-		assert.False(t, status.ReadyToUse)
+		assert.False(t, *status.ReadyToUse)
 		require.NotNil(t, status.Error)
 		assert.NotNil(t, status.Error.Time)
 		assert.Contains(t, *status.Error.Message, "readwrite-bucket")
@@ -756,7 +757,7 @@ func Test_validateAccessAgainstClass(t *testing.T) {
 			&cosiapi.BucketAccessClassSpec{
 				AuthenticationType: cosiapi.BucketAccessAuthenticationTypeKey,
 				FeatureOptions: cosiapi.BucketAccessFeatureOptions{
-					DisallowMultiBucketAccess: true,
+					DisallowMultiBucketAccess: ptr.To(true),
 				},
 			},
 			&cosiapi.BucketAccessSpec{
@@ -849,7 +850,7 @@ func Test_validateAccessAgainstClass(t *testing.T) {
 			&cosiapi.BucketAccessClassSpec{
 				AuthenticationType: cosiapi.BucketAccessAuthenticationTypeServiceAccount,
 				FeatureOptions: cosiapi.BucketAccessFeatureOptions{
-					DisallowMultiBucketAccess: true,
+					DisallowMultiBucketAccess: ptr.To(true),
 				},
 			},
 			&cosiapi.BucketAccessSpec{

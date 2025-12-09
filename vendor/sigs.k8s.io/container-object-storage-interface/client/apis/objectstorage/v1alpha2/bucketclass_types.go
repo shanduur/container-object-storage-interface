@@ -25,7 +25,7 @@ type BucketClassSpec struct {
 	// driverName is the name of the driver that fulfills requests for this BucketClass.
 	// +required
 	// +kubebuilder:validation:MinLength=1
-	DriverName string `json:"driverName"`
+	DriverName string `json:"driverName,omitempty"`
 
 	// deletionPolicy determines whether a Bucket created through the BucketClass should be deleted
 	// when its bound BucketClaim is deleted.
@@ -33,7 +33,7 @@ type BucketClassSpec struct {
 	//  - Retain: keep both the Bucket object and the backend bucket
 	//  - Delete: delete both the Bucket object and the backend bucket
 	// +required
-	DeletionPolicy BucketDeletionPolicy `json:"deletionPolicy"`
+	DeletionPolicy BucketDeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// parameters is an opaque map of driver-specific configuration items passed to the driver that
 	// fulfills requests for this BucketClass.
@@ -59,7 +59,7 @@ type BucketClass struct {
 	// spec defines the BucketClass. spec is entirely immutable.
 	// +required
 	// +kubebuilder:validation:XValidation:message="BucketClass spec is immutable",rule="self == oldSelf"
-	Spec BucketClassSpec `json:"spec"`
+	Spec BucketClassSpec `json:"spec,omitzero"`
 }
 
 // +kubebuilder:object:root=true

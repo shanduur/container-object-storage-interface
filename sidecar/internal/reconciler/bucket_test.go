@@ -159,7 +159,7 @@ func TestBucketReconciler_Reconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, bucket.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		assert.Equal(t, b.Spec, bucket.Spec) // spec should not change
-		assert.True(t, bucket.Status.ReadyToUse)
+		assert.True(t, *bucket.Status.ReadyToUse)
 		assert.Equal(t, "cosi-bc-qwerty", bucket.Status.BucketID)
 		assert.Equal(t,
 			[]cosiapi.ObjectProtocol{cosiapi.ObjectProtocolS3},
@@ -410,7 +410,7 @@ func TestBucketReconciler_Reconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, b.Finalizers, bucket.Finalizers)
 		assert.Equal(t, b.Spec, bucket.Spec)
-		assert.False(t, bucket.Status.ReadyToUse) // assume this means no other statuses were set
+		assert.False(t, *bucket.Status.ReadyToUse) // assume this means no other statuses were set
 		serr := bucket.Status.Error
 		require.NotNil(t, serr)
 		assert.NotNil(t, serr.Time)
@@ -476,7 +476,7 @@ func TestBucketReconciler_Reconcile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Contains(t, bucket.GetFinalizers(), cosiapi.ProtectionFinalizer)
 		assert.Equal(t, b.Spec, bucket.Spec)
-		assert.False(t, bucket.Status.ReadyToUse) // assume this means no other statuses were set
+		assert.False(t, *bucket.Status.ReadyToUse) // assume this means no other statuses were set
 		serr := bucket.Status.Error
 		require.NotNil(t, serr)
 		assert.NotNil(t, serr.Time)

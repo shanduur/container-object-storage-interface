@@ -91,7 +91,7 @@ BucketAccessAuthenticationType specifies what authentication mechanism is used f
 bucket access.
 
 _Validation:_
-- Enum: [ Key ServiceAccount]
+- Enum: [Key ServiceAccount]
 
 _Appears in:_
 - [BucketAccessClassSpec](#bucketaccessclassspec)
@@ -156,7 +156,7 @@ _Appears in:_
 | `driverName` _string_ | driverName is the name of the driver that fulfills requests for this BucketAccessClass. |  | MinLength: 1 <br /> |
 | `authenticationType` _[BucketAccessAuthenticationType](#bucketaccessauthenticationtype)_ | authenticationType specifies which authentication mechanism is used bucket access.<br />Possible values:<br /> - Key: The driver should generate a protocol-appropriate access key that clients can use to<br />   authenticate to the backend object store.<br /> - ServiceAccount: The driver should configure the system such that Pods using the given<br />   ServiceAccount authenticate to the backend object store automatically. |  | Enum: [Key ServiceAccount] <br /> |
 | `parameters` _object (keys:string, values:string)_ | parameters is an opaque map of driver-specific configuration items passed to the driver that<br />fulfills requests for this BucketAccessClass. |  |  |
-| `featureOptions` _[BucketAccessFeatureOptions](#bucketaccessfeatureoptions)_ | featureOptions can be used to adjust various COSI access provisioning behaviors. |  |  |
+| `featureOptions` _[BucketAccessFeatureOptions](#bucketaccessfeatureoptions)_ | featureOptions can be used to adjust various COSI access provisioning behaviors.<br />If specified, at least one option must be set. |  | MinProperties: 1 <br /> |
 
 
 #### BucketAccessFeatureOptions
@@ -165,7 +165,8 @@ _Appears in:_
 
 BucketAccessFeatureOptions defines various COSI access provisioning behaviors.
 
-
+_Validation:_
+- MinProperties: 1
 
 _Appears in:_
 - [BucketAccessClassSpec](#bucketaccessclassspec)
@@ -232,7 +233,7 @@ _Appears in:_
 | `bucketClaims` _[BucketClaimAccess](#bucketclaimaccess) array_ | bucketClaims is a list of BucketClaims the provisioned access must have permissions for,<br />along with per-BucketClaim access parameters and system output definitions.<br />At least one BucketClaim must be referenced.<br />Multiple references to the same BucketClaim are not permitted. |  | MinItems: 1 <br /> |
 | `bucketAccessClassName` _string_ | bucketAccessClassName selects the BucketAccessClass for provisioning the access. |  | MaxLength: 253 <br />MinLength: 1 <br /> |
 | `protocol` _[ObjectProtocol](#objectprotocol)_ | protocol is the object storage protocol that the provisioned access must use. |  | Enum: [S3 Azure GCS] <br /> |
-| `serviceAccountName` _string_ | serviceAccountName is the name of the Kubernetes ServiceAccount that user application Pods<br />intend to use for access to referenced BucketClaims.<br />This has different behavior based on the BucketAccessClass's defined AuthenticationType:<br />- Key: This field is ignored.<br />- ServiceAccount: This field is required. The driver should configure the system so that Pods<br />  using the ServiceAccount authenticate to the object storage backend automatically. |  | MaxLength: 253 <br /> |
+| `serviceAccountName` _string_ | serviceAccountName is the name of the Kubernetes ServiceAccount that user application Pods<br />intend to use for access to referenced BucketClaims.<br />This has different behavior based on the BucketAccessClass's defined AuthenticationType:<br />- Key: This field is ignored.<br />- ServiceAccount: This field is required. The driver should configure the system so that Pods<br />  using the ServiceAccount authenticate to the object storage backend automatically. |  | MaxLength: 253 <br />MinLength: 1 <br /> |
 
 
 #### BucketAccessStatus
@@ -249,10 +250,10 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `readyToUse` _boolean_ | readyToUse indicates that the BucketAccess is ready for consumption by workloads. |  |  |
-| `accountID` _string_ | accountID is the unique identifier for the backend access known to the driver.<br />This field is populated by the COSI Sidecar once access has been successfully granted. |  |  |
-| `accessedBuckets` _[AccessedBucket](#accessedbucket) array_ | accessedBuckets is a list of Buckets the provisioned access must have permissions for, along<br />with per-Bucket access options. This field is populated by the COSI Controller based on the<br />referenced BucketClaims in the spec. |  |  |
-| `driverName` _string_ | driverName holds a copy of the BucketAccessClass driver name from the time of BucketAccess<br />provisioning. This field is populated by the COSI Controller. |  |  |
-| `authenticationType` _[BucketAccessAuthenticationType](#bucketaccessauthenticationtype)_ | authenticationType holds a copy of the BucketAccessClass authentication type from the time of<br />BucketAccess provisioning. This field is populated by the COSI Controller. |  | Enum: [ Key ServiceAccount] <br /> |
+| `accountID` _string_ | accountID is the unique identifier for the backend access known to the driver.<br />This field is populated by the COSI Sidecar once access has been successfully granted. |  | MinLength: 1 <br /> |
+| `accessedBuckets` _[AccessedBucket](#accessedbucket) array_ | accessedBuckets is a list of Buckets the provisioned access must have permissions for, along<br />with per-Bucket access options. This field is populated by the COSI Controller based on the<br />referenced BucketClaims in the spec. |  | MinItems: 1 <br /> |
+| `driverName` _string_ | driverName holds a copy of the BucketAccessClass driver name from the time of BucketAccess<br />provisioning. This field is populated by the COSI Controller. |  | MinLength: 1 <br /> |
+| `authenticationType` _[BucketAccessAuthenticationType](#bucketaccessauthenticationtype)_ | authenticationType holds a copy of the BucketAccessClass authentication type from the time of<br />BucketAccess provisioning. This field is populated by the COSI Controller. |  | Enum: [Key ServiceAccount] <br /> |
 | `parameters` _object (keys:string, values:string)_ | parameters holds a copy of the BucketAccessClass parameters from the time of BucketAccess<br />provisioning. This field is populated by the COSI Controller. |  |  |
 | `error` _[TimestampedError](#timestampederror)_ | error holds the most recent error message, with a timestamp.<br />This is cleared when provisioning is successful. |  |  |
 
@@ -275,7 +276,7 @@ _Appears in:_
 | `kind` _string_ | Kind is a string value representing the REST resource this object represents.<br />Servers may infer this from the endpoint the client submits requests to.<br />Cannot be updated.<br />In CamelCase.<br />More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds |  |  |
 | `apiVersion` _string_ | APIVersion defines the versioned schema of this representation of an object.<br />Servers should convert recognized schemas to the latest internal value, and<br />may reject unrecognized values.<br />More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources |  |  |
 | `metadata` _[ObjectMeta](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#objectmeta-v1-meta)_ | Refer to Kubernetes API documentation for fields of `metadata`. |  |  |
-| `spec` _[BucketClaimSpec](#bucketclaimspec)_ | spec defines the desired state of BucketClaim |  |  |
+| `spec` _[BucketClaimSpec](#bucketclaimspec)_ | spec defines the desired state of BucketClaim |  | MinProperties: 1 <br /> |
 | `status` _[BucketClaimStatus](#bucketclaimstatus)_ | status defines the observed state of BucketClaim |  |  |
 
 
@@ -333,7 +334,7 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `name` _string_ | name is the name of the BucketClaim being referenced. |  | MaxLength: 253 <br />MinLength: 1 <br /> |
-| `namespace` _string_ | namespace is the namespace of the BucketClaim being referenced.<br />If empty, the Kubernetes 'default' namespace is assumed.<br />namespace is immutable except to update '' to 'default'. |  | MaxLength: 253 <br />MinLength: 0 <br /> |
+| `namespace` _string_ | namespace is the namespace of the BucketClaim being referenced. |  | MaxLength: 253 <br />MinLength: 1 <br /> |
 | `uid` _[UID](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.34/#uid-types-pkg)_ | uid is the UID of the BucketClaim being referenced. |  |  |
 
 
@@ -343,16 +344,17 @@ _Appears in:_
 
 BucketClaimSpec defines the desired state of BucketClaim
 
-
+_Validation:_
+- MinProperties: 1
 
 _Appears in:_
 - [BucketClaim](#bucketclaim)
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `bucketClassName` _string_ | bucketClassName selects the BucketClass for provisioning the BucketClaim.<br />This field is used only for BucketClaim dynamic provisioning.<br />If unspecified, existingBucketName must be specified for binding to an existing Bucket. |  | MaxLength: 253 <br /> |
+| `bucketClassName` _string_ | bucketClassName selects the BucketClass for provisioning the BucketClaim.<br />This field is used only for BucketClaim dynamic provisioning.<br />If unspecified, existingBucketName must be specified for binding to an existing Bucket. |  | MaxLength: 253 <br />MinLength: 1 <br /> |
 | `protocols` _[ObjectProtocol](#objectprotocol) array_ | protocols lists object storage protocols that the provisioned Bucket must support.<br />If specified, COSI will verify that each item is advertised as supported by the driver. |  | Enum: [S3 Azure GCS] <br /> |
-| `existingBucketName` _string_ | existingBucketName selects the name of an existing Bucket resource that this BucketClaim<br />should bind to.<br />This field is used only for BucketClaim static provisioning.<br />If unspecified, bucketClassName must be specified for dynamically provisioning a new bucket. |  | MaxLength: 253 <br /> |
+| `existingBucketName` _string_ | existingBucketName selects the name of an existing Bucket resource that this BucketClaim<br />should bind to.<br />This field is used only for BucketClaim static provisioning.<br />If unspecified, bucketClassName must be specified for dynamically provisioning a new bucket. |  | MaxLength: 253 <br />MinLength: 1 <br /> |
 
 
 #### BucketClaimStatus
@@ -368,7 +370,7 @@ _Appears in:_
 
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
-| `boundBucketName` _string_ | boundBucketName is the name of the Bucket this BucketClaim is bound to. |  | MaxLength: 253 <br /> |
+| `boundBucketName` _string_ | boundBucketName is the name of the Bucket this BucketClaim is bound to. |  | MaxLength: 253 <br />MinLength: 1 <br /> |
 | `readyToUse` _boolean_ | readyToUse indicates that the bucket is ready for consumption by workloads. |  |  |
 | `protocols` _[ObjectProtocol](#objectprotocol) array_ | protocols is the set of protocols the bound Bucket reports to support. BucketAccesses can<br />request access to this BucketClaim using any of the protocols reported here. |  | Enum: [S3 Azure GCS] <br /> |
 | `error` _[TimestampedError](#timestampederror)_ | error holds the most recent error message, with a timestamp.<br />This is cleared when provisioning is successful. |  |  |
@@ -495,7 +497,7 @@ _Appears in:_
 | `parameters` _object (keys:string, values:string)_ | parameters is an opaque map of driver-specific configuration items passed to the driver that<br />fulfills requests for this Bucket. |  |  |
 | `protocols` _[ObjectProtocol](#objectprotocol) array_ | protocols lists object store protocols that the provisioned Bucket must support.<br />If specified, COSI will verify that each item is advertised as supported by the driver. |  | Enum: [S3 Azure GCS] <br /> |
 | `bucketClaim` _[BucketClaimReference](#bucketclaimreference)_ | bucketClaim references the BucketClaim that resulted in the creation of this Bucket.<br />For statically-provisioned buckets, set the namespace and name of the BucketClaim that is<br />allowed to bind to this Bucket. |  |  |
-| `existingBucketID` _string_ | existingBucketID is the unique identifier for an existing backend bucket known to the driver.<br />Use driver documentation to determine how to set this value.<br />This field is used only for Bucket static provisioning.<br />This field will be empty when the Bucket is dynamically provisioned from a BucketClaim. |  |  |
+| `existingBucketID` _string_ | existingBucketID is the unique identifier for an existing backend bucket known to the driver.<br />Use driver documentation to determine how to set this value.<br />This field is used only for Bucket static provisioning.<br />This field will be empty when the Bucket is dynamically provisioned from a BucketClaim. |  | MinLength: 1 <br /> |
 
 
 #### BucketStatus
@@ -512,10 +514,10 @@ _Appears in:_
 | Field | Description | Default | Validation |
 | --- | --- | --- | --- |
 | `readyToUse` _boolean_ | readyToUse indicates that the bucket is ready for consumption by workloads. |  |  |
-| `bucketID` _string_ | bucketID is the unique identifier for the backend bucket known to the driver. |  |  |
+| `bucketID` _string_ | bucketID is the unique identifier for the backend bucket known to the driver. |  | MinLength: 1 <br /> |
 | `protocols` _[ObjectProtocol](#objectprotocol) array_ | protocols is the set of protocols the Bucket reports to support. BucketAccesses can request<br />access to this BucketClaim using any of the protocols reported here. |  | Enum: [S3 Azure GCS] <br /> |
-| `bucketInfo` _object (keys:string, values:string)_ | BucketInfo reported by the driver, rendered in the COSI_<PROTOCOL>_<KEY> format used for the<br />BucketAccess Secret. e.g., COSI_S3_ENDPOINT, COSI_AZURE_STORAGE_ACCOUNT.<br />This should not contain any sensitive information. |  |  |
-| `error` _[TimestampedError](#timestampederror)_ | Error holds the most recent error message, with a timestamp.<br />This is cleared when provisioning is successful. |  |  |
+| `bucketInfo` _object (keys:string, values:string)_ | bucketInfo contains info about the bucket reported by the driver, rendered in the same<br />COSI_<PROTOCOL>_<KEY> format used for the BucketAccess Secret.<br />e.g., COSI_S3_ENDPOINT, COSI_AZURE_STORAGE_ACCOUNT.<br />This should not contain any sensitive information. |  |  |
+| `error` _[TimestampedError](#timestampederror)_ | error holds the most recent error message, with a timestamp.<br />This is cleared when provisioning is successful. |  |  |
 
 
 #### CosiEnvVar

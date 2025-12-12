@@ -27,6 +27,7 @@ import (
 	"google.golang.org/grpc/status"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -70,6 +71,9 @@ func (r *BucketReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	err := r.reconcile(ctx, logger, bucket)
 	if err != nil {
 		// Record any error as a timestamped error in the status.
+		if bucket.Status.ReadyToUse == nil {
+			bucket.Status.ReadyToUse = ptr.To(false)
+		}
 		bucket.Status.Error = cosiapi.NewTimestampedError(time.Now(), err.Error())
 		if updErr := r.Status().Update(ctx, bucket); updErr != nil {
 			logger.Error(err, "failed to update Bucket status after reconcile error", "updateError", updErr)
@@ -86,6 +90,9 @@ func (r *BucketReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 
 	// On success, clear any errors in the status.
 	if bucket.Status.Error != nil && !bucket.DeletionTimestamp.IsZero() {
+		if bucket.Status.ReadyToUse == nil {
+			bucket.Status.ReadyToUse = ptr.To(false)
+		}
 		bucket.Status.Error = nil
 		if err := r.Status().Update(ctx, bucket); err != nil {
 			logger.Error(err, "failed to update BucketClaim status after reconcile success")
@@ -199,7 +206,7 @@ func (r *BucketReconciler) reconcile(ctx context.Context, logger logr.Logger, bu
 	}
 
 	bucket.Status = cosiapi.BucketStatus{
-		ReadyToUse: true,
+		ReadyToUse: ptr.To(true),
 		BucketID:   provisionedBucket.bucketId,
 		Protocols:  provisionedBucket.supportedProtos,
 		BucketInfo: provisionedBucket.allProtoBucketInfo,

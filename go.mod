@@ -15,6 +15,7 @@ require (
 	google.golang.org/grpc v1.75.1
 	k8s.io/apimachinery v0.34.2
 	k8s.io/client-go v0.34.2
+	k8s.io/utils v0.0.0-20250820121507-0af2bda4dd1d
 	sigs.k8s.io/container-object-storage-interface/client v0.0.0-20250925174816-5fce7c365e9c
 	sigs.k8s.io/container-object-storage-interface/proto v0.0.0-00010101000000-000000000000
 	sigs.k8s.io/controller-runtime v0.22.1
@@ -104,7 +105,6 @@ require (
 	k8s.io/component-base v0.34.1 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20250910181357-589584f1c912 // indirect
-	k8s.io/utils v0.0.0-20250820121507-0af2bda4dd1d // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.33.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect

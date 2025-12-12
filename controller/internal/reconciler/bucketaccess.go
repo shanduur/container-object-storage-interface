@@ -27,6 +27,7 @@ import (
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -78,6 +79,9 @@ func (r *BucketAccessReconciler) Reconcile(ctx context.Context, req ctrl.Request
 		err = fmt.Errorf("COSI Controller error: %w", err)
 
 		// Record any error as a timestamped error in the status.
+		if access.Status.ReadyToUse == nil {
+			access.Status.ReadyToUse = ptr.To(false)
+		}
 		access.Status.Error = cosiapi.NewTimestampedError(time.Now(), err.Error())
 		if updErr := r.Status().Update(ctx, access); updErr != nil {
 			logger.Error(err, "failed to update BucketAccess status after reconcile error", "updateError", updErr)
@@ -224,6 +228,9 @@ func (r *BucketAccessReconciler) reconcile(
 	}
 
 	// After this status update, resource management should be handed off to the Sidecar
+	if access.Status.ReadyToUse == nil {
+		access.Status.ReadyToUse = ptr.To(false)
+	}
 	access.Status.AccessedBuckets = accessedBuckets
 	access.Status.DriverName = class.Spec.DriverName
 	access.Status.AuthenticationType = class.Spec.AuthenticationType
@@ -363,7 +370,7 @@ func validateAccessAgainstClass(
 		errs = append(errs, fmt.Errorf("serviceAccountName must be specified"))
 	}
 
-	if class.FeatureOptions.DisallowMultiBucketAccess && len(access.BucketClaims) > 1 {
+	if ptr.Deref(class.FeatureOptions.DisallowMultiBucketAccess, false) && len(access.BucketClaims) > 1 {
 		errs = append(errs, fmt.Errorf("multi-bucket access is disallowed"))
 	}
 

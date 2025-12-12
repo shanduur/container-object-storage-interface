@@ -27,6 +27,7 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	ctrlutil "sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -68,6 +69,9 @@ func (r *BucketClaimReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	err := r.reconcile(ctx, logger, claim)
 	if err != nil {
 		// Record any error as a timestamped error in the status.
+		if claim.Status.ReadyToUse == nil {
+			claim.Status.ReadyToUse = ptr.To(false)
+		}
 		claim.Status.Error = cosiapi.NewTimestampedError(time.Now(), err.Error())
 		if updErr := r.Status().Update(ctx, claim); updErr != nil {
 			logger.Error(err, "failed to update BucketClaim status after reconcile error", "updateError", updErr)
@@ -84,6 +88,9 @@ func (r *BucketClaimReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	// On success, clear any errors in the status.
 	if claim.Status.Error != nil && !claim.DeletionTimestamp.IsZero() {
+		if claim.Status.ReadyToUse == nil {
+			claim.Status.ReadyToUse = ptr.To(false)
+		}
 		claim.Status.Error = nil
 		if err := r.Status().Update(ctx, claim); err != nil {
 			logger.Error(err, "failed to update BucketClaim status after reconcile success")
@@ -156,6 +163,9 @@ func (r *BucketClaimReconciler) reconcile(ctx context.Context, logger logr.Logge
 
 	if claim.Status.BoundBucketName == "" {
 		logger.Info("binding BucketClaim to Bucket")
+		if claim.Status.ReadyToUse == nil {
+			claim.Status.ReadyToUse = ptr.To(false)
+		}
 		claim.Status.BoundBucketName = bucketName
 		if err := r.Status().Update(ctx, claim); err != nil {
 			logger.Error(err, "failed to bind BucketClaim to Bucket")

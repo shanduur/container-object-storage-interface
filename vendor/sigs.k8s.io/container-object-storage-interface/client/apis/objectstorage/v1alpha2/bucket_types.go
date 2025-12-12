@@ -37,15 +37,15 @@ const (
 )
 
 // BucketSpec defines the desired state of Bucket
-// +kubebuilder:validation:XValidation:message="parameters map is immutable",rule="has(oldSelf.parameters) == has(self.parameters)"
-// +kubebuilder:validation:XValidation:message="protocols list is immutable",rule="has(oldSelf.protocols) == has(self.protocols)"
-// +kubebuilder:validation:XValidation:message="existingBucketID is immutable",rule="has(oldSelf.existingBucketID) == has(self.existingBucketID)"
+// +kubebuilder:validation:XValidation:message="parameters map cannot be added or removed after creation",rule="has(oldSelf.parameters) == has(self.parameters)"
+// +kubebuilder:validation:XValidation:message="protocols list cannot be added or removed after creation",rule="has(oldSelf.protocols) == has(self.protocols)"
+// +kubebuilder:validation:XValidation:message="existingBucketID cannot be added or removed after creation",rule="has(oldSelf.existingBucketID) == has(self.existingBucketID)"
 type BucketSpec struct {
 	// driverName is the name of the driver that fulfills requests for this Bucket.
 	// +required
 	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:XValidation:message="driverName is immutable",rule="self == oldSelf"
-	DriverName string `json:"driverName"`
+	DriverName string `json:"driverName,omitempty"`
 
 	// deletionPolicy determines whether a Bucket should be deleted when its bound BucketClaim is
 	// deleted. This is mutable to allow Admins to change the policy after creation.
@@ -53,7 +53,7 @@ type BucketSpec struct {
 	//  - Retain: keep both the Bucket object and the backend bucket
 	//  - Delete: delete both the Bucket object and the backend bucket
 	// +required
-	DeletionPolicy BucketDeletionPolicy `json:"deletionPolicy"`
+	DeletionPolicy BucketDeletionPolicy `json:"deletionPolicy,omitempty"`
 
 	// parameters is an opaque map of driver-specific configuration items passed to the driver that
 	// fulfills requests for this Bucket.
@@ -72,68 +72,70 @@ type BucketSpec struct {
 	// For statically-provisioned buckets, set the namespace and name of the BucketClaim that is
 	// allowed to bind to this Bucket.
 	// +required
-	BucketClaimRef BucketClaimReference `json:"bucketClaim"`
+	BucketClaimRef BucketClaimReference `json:"bucketClaim,omitzero"`
 
 	// existingBucketID is the unique identifier for an existing backend bucket known to the driver.
 	// Use driver documentation to determine how to set this value.
 	// This field is used only for Bucket static provisioning.
 	// This field will be empty when the Bucket is dynamically provisioned from a BucketClaim.
 	// +optional
+	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:XValidation:message="existingBucketID is immutable",rule="self == oldSelf"
 	ExistingBucketID string `json:"existingBucketID,omitempty"`
 }
 
 // BucketClaimReference is a reference to a BucketClaim object.
-// +kubebuilder:validation:XValidation:message="namespace is immutable once set",rule="!has(oldSelf.namespace) || has(self.namespace)"
-// +kubebuilder:validation:XValidation:message="uid is immutable once set",rule="!has(oldSelf.uid) || has(self.uid)"
+// +kubebuilder:validation:XValidation:message="namespace cannot be removed once set",rule="!has(oldSelf.namespace) || has(self.namespace)"
+// +kubebuilder:validation:XValidation:message="uid cannot be removed once set",rule="!has(oldSelf.uid) || has(self.uid)"
 type BucketClaimReference struct {
 	// name is the name of the BucketClaim being referenced.
 	// +required
 	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:MaxLength=253
 	// +kubebuilder:validation:XValidation:message="name is immutable",rule="self == oldSelf"
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	// namespace is the namespace of the BucketClaim being referenced.
-	// If empty, the Kubernetes 'default' namespace is assumed.
-	// namespace is immutable except to update '' to 'default'.
-	// +optional
-	// +kubebuilder:validation:MinLength=0
+	// +required
+	// +kubebuilder:validation:MinLength=1
 	// +kubebuilder:validation:MaxLength=253
-	// +kubebuilder:validation:XValidation:message="namespace is immutable",rule="(oldSelf == '' && self == 'default') || self == oldSelf"
-	Namespace string `json:"namespace"`
+	// +kubebuilder:validation:XValidation:message="namespace is immutable",rule="self == oldSelf"
+	Namespace string `json:"namespace,omitempty"`
 
 	// uid is the UID of the BucketClaim being referenced.
 	// +optional
 	// +kubebuilder:validation:XValidation:message="uid is immutable once set",rule="oldSelf == '' || self == oldSelf"
-	UID types.UID `json:"uid"`
+	UID types.UID `json:"uid,omitempty"`
 }
 
 // BucketStatus defines the observed state of Bucket.
-// +kubebuilder:validation:XValidation:message="bucketID is immutable once set",rule="!has(oldSelf.bucketID) || has(self.bucketID)"
-// +kubebuilder:validation:XValidation:message="protocols is immutable once set",rule="!has(oldSelf.protocols) || has(self.protocols)"
+// +kubebuilder:validation:XValidation:message="bucketID cannot be removed once set",rule="!has(oldSelf.bucketID) || has(self.bucketID)"
+// +kubebuilder:validation:XValidation:message="protocols cannot be removed once set",rule="!has(oldSelf.protocols) || has(self.protocols)"
 type BucketStatus struct {
 	// readyToUse indicates that the bucket is ready for consumption by workloads.
-	ReadyToUse bool `json:"readyToUse"`
+	// +required
+	ReadyToUse *bool `json:"readyToUse,omitempty"`
 
 	// bucketID is the unique identifier for the backend bucket known to the driver.
 	// +optional
-	// +kubebuilder:validation:XValidation:message="boundBucketName is immutable once set",rule="oldSelf == '' || self == oldSelf"
-	BucketID string `json:"bucketID"`
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:XValidation:message="boundBucketName is immutable once set",rule="self == oldSelf"
+	BucketID string `json:"bucketID,omitempty"`
 
 	// protocols is the set of protocols the Bucket reports to support. BucketAccesses can request
 	// access to this BucketClaim using any of the protocols reported here.
 	// +optional
 	// +listType=set
-	Protocols []ObjectProtocol `json:"protocols"`
+	Protocols []ObjectProtocol `json:"protocols,omitempty"`
 
-	// BucketInfo reported by the driver, rendered in the COSI_<PROTOCOL>_<KEY> format used for the
-	// BucketAccess Secret. e.g., COSI_S3_ENDPOINT, COSI_AZURE_STORAGE_ACCOUNT.
+	// bucketInfo contains info about the bucket reported by the driver, rendered in the same
+	// COSI_<PROTOCOL>_<KEY> format used for the BucketAccess Secret.
+	// e.g., COSI_S3_ENDPOINT, COSI_AZURE_STORAGE_ACCOUNT.
 	// This should not contain any sensitive information.
 	// +optional
 	BucketInfo map[string]string `json:"bucketInfo,omitempty"`
 
-	// Error holds the most recent error message, with a timestamp.
+	// error holds the most recent error message, with a timestamp.
 	// This is cleared when provisioning is successful.
 	// +optional
 	Error *TimestampedError `json:"error,omitempty"`
@@ -154,11 +156,11 @@ type Bucket struct {
 
 	// spec defines the desired state of Bucket
 	// +required
-	Spec BucketSpec `json:"spec"`
+	Spec BucketSpec `json:"spec,omitzero"`
 
 	// status defines the observed state of Bucket
 	// +optional
-	Status BucketStatus `json:"status,omitempty,omitzero"`
+	Status BucketStatus `json:"status,omitzero"`
 }
 
 // +kubebuilder:object:root=true
